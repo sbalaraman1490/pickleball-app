@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, NavLink, Link } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Users, Receipt, Scale, LogOut, Shield, User } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Receipt, Scale, LogOut, Shield, User, BookOpen, MessageSquare, ShoppingBag } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import Dashboard from './pages/Dashboard';
 import Games from './pages/Games';
@@ -9,6 +9,9 @@ import Expenses from './pages/Expenses';
 import Balances from './pages/Balances';
 import Admin from './pages/Admin';
 import Profile from './pages/Profile';
+import Rules from './pages/Rules';
+import Feed from './pages/Feed';
+import PaddleCompare from './pages/PaddleCompare';
 import './App.css';
 
 function AppLayout() {
@@ -78,6 +81,26 @@ function AppLayout() {
               <span>Balances</span>
             </NavLink>
           </li>
+          <li className="nav-divider"></li>
+          <li>
+            <NavLink to="/app/rules" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <BookOpen size={20} />
+              <span>Rules & Guide</span>
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/app/feed" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <MessageSquare size={20} />
+              <span>Community Feed</span>
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/app/paddles" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <ShoppingBag size={20} />
+              <span>Paddle Compare</span>
+            </NavLink>
+          </li>
+          <li className="nav-divider"></li>
           <li>
             <NavLink to="/app/profile" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               <User size={20} />
@@ -106,6 +129,9 @@ function AppLayout() {
           <Route path="/players" element={<Players />} />
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/balances" element={<Balances />} />
+          <Route path="/rules" element={<Rules />} />
+          <Route path="/feed" element={<Feed />} />
+          <Route path="/paddles" element={<PaddleCompare />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>

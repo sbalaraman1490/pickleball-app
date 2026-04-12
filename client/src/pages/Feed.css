@@ -1,0 +1,335 @@
+.feed-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* New Post Form */
+.feed-post-form {
+  padding: 8px;
+}
+
+.feed-post-input {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.feed-post-input textarea {
+  flex: 1;
+  padding: 14px 18px;
+  border: 2px solid var(--gray-200, #e2e8f0);
+  border-radius: 14px;
+  font-size: 1rem;
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.feed-post-input textarea:focus {
+  outline: none;
+  border-color: var(--primary, #065f46);
+  box-shadow: 0 0 0 4px rgba(6, 95, 70, 0.1);
+}
+
+.feed-post-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Feed Filters */
+.feed-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.feed-filter {
+  padding: 10px 20px;
+  border: 2px solid var(--gray-200, #e2e8f0);
+  background: white;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--gray-600, #475569);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.feed-filter:hover {
+  border-color: var(--primary, #065f46);
+  color: var(--primary, #065f46);
+}
+
+.feed-filter.active {
+  background: var(--primary, #065f46);
+  border-color: var(--primary, #065f46);
+  color: white;
+}
+
+/* Feed Post Card */
+.feed-post-card {
+  background: white;
+  border-radius: var(--radius-md, 14px);
+  box-shadow: var(--shadow, 0 1px 3px rgba(0,0,0,0.1));
+  padding: 24px;
+  border: 1px solid var(--gray-100, #f1f5f9);
+  transition: all 0.2s;
+}
+
+.feed-post-card:hover {
+  box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0,0,0,0.1));
+}
+
+/* Post Header */
+.feed-post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.feed-author {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.feed-avatar {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, var(--primary, #065f46) 0%, var(--primary-light, #059669) 100%);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.feed-author-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.feed-author-name {
+  font-weight: 600;
+  color: var(--gray-800, #1e293b);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.feed-badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.feed-badge.admin {
+  background: #8b5cf620;
+  color: #8b5cf6;
+}
+
+.feed-badge.coach {
+  background: #f59e0b20;
+  color: #f59e0b;
+}
+
+.feed-badge.organizer {
+  background: #ef444420;
+  color: #ef4444;
+}
+
+.feed-badge.news {
+  background: #3b82f620;
+  color: #3b82f6;
+}
+
+.feed-timestamp {
+  font-size: 0.85rem;
+  color: var(--gray-400, #94a3b8);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.feed-type-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Post Content */
+.feed-post-content {
+  margin-bottom: 20px;
+}
+
+.feed-post-content p {
+  color: var(--gray-700, #334155);
+  line-height: 1.7;
+  font-size: 1rem;
+  white-space: pre-wrap;
+}
+
+/* Stats Box (Game Results) */
+.feed-stats-box {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+  padding: 16px;
+  background: var(--gray-50, #f8fafc);
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+
+.feed-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--gray-600, #475569);
+  font-size: 0.95rem;
+}
+
+.feed-stat.highlight {
+  color: var(--primary, #065f46);
+  font-weight: 600;
+}
+
+/* Event Box */
+.feed-event-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 12px;
+  border: 1px solid #fcd34d;
+}
+
+.feed-event-detail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #92400e;
+  font-size: 0.95rem;
+}
+
+.feed-event-badge {
+  display: inline-flex;
+  align-self: flex-start;
+  padding: 6px 12px;
+  background: var(--primary, #065f46);
+  color: white;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Post Footer */
+.feed-post-footer {
+  display: flex;
+  gap: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--gray-100, #f1f5f9);
+}
+
+.feed-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: var(--gray-500, #64748b);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.feed-action:hover {
+  background: var(--gray-100, #f1f5f9);
+  color: var(--gray-700, #334155);
+}
+
+.feed-action.liked {
+  color: var(--primary, #065f46);
+  background: #d1fae5;
+}
+
+/* Loading & Empty States */
+.feed-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 60px;
+  color: var(--gray-500, #64748b);
+}
+
+.feed-loading .spin {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--gray-200, #e2e8f0);
+  border-top-color: var(--primary, #065f46);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.feed-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--gray-400, #94a3b8);
+}
+
+.feed-empty svg {
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+  .feed-filters {
+    gap: 8px;
+  }
+  
+  .feed-filter {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+  
+  .feed-post-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .feed-type-badge {
+    align-self: flex-start;
+  }
+  
+  .feed-stats-box {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
