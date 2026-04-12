@@ -16,6 +16,62 @@ const SMTP_PASS = process.env.SMTP_PASS;
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@dinkans.com';
 const APP_URL = process.env.APP_URL || 'https://www.dinkans.com';
 
+// CAPTCHA Configuration
+const RECAPTCHA_SECRET_KEY = process.env.RECAPTCHA_SECRET_KEY;
+const ENABLE_CAPTCHA = process.env.ENABLE_CAPTCHA === 'true' || !!RECAPTCHA_SECRET_KEY;
+
+// CAPTCHA verification middleware
+async function verifyCaptcha(token) {
+  if (!ENABLE_CAPTCHA || !RECAPTCHA_SECRET_KEY) {
+    return { success: true, message: 'CAPTCHA not configured' };
+  }
+
+  try {
+    const response = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `secret=${RECAPTCHA_SECRET_KEY}&response=${token}`
+    });
+
+    const data = await response.json();
+    
+    if (!data.success) {
+      return { success: false, error: 'CAPTCHA verification failed' };
+    }
+
+    // Check score for v3 (optional threshold)
+    if (data.score !== undefined && data.score < 0.5) {
+      return { success: false, error: 'CAPTCHA score too low' };
+    }
+
+    return { success: true, data };
+  } catch (error) {
+    console.error('CAPTCHA verification error:', error);
+    return { success: false, error: 'CAPTCHA verification error' };
+  }
+}
+
+// CAPTCHA middleware for routes
+const requireCaptcha = async (req, res, next) => {
+  if (!ENABLE_CAPTCHA) {
+    return next();
+  }
+
+  const captchaToken = req.body.captchaToken || req.headers['x-captcha-token'];
+  
+  if (!captchaToken) {
+    return res.status(400).json({ error: 'CAPTCHA verification required' });
+  }
+
+  const result = await verifyCaptcha(captchaToken);
+  
+  if (!result.success) {
+    return res.status(400).json({ error: result.error || 'CAPTCHA verification failed' });
+  }
+
+  next();
+};
+
 // Simple email sender function (uses SMTP if configured, otherwise logs)
 async function sendEmail(to, subject, htmlContent, textContent) {
   // If no SMTP configured, just log the email (for development)
@@ -234,6 +290,17 @@ db.serialize(() => {
     approved BOOLEAN DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+
+  // Password reset tokens table
+  db.run(`CREATE TABLE IF NOT EXISTS password_resets (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    token TEXT UNIQUE NOT NULL,
+    expires_at DATETIME NOT NULL,
+    used BOOLEAN DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  )`);
 });
 
 // ========== AUTHENTICATION MIDDLEWARE & API ==========
@@ -272,7 +339,18 @@ const requireAdmin = (req, res, next) => {
 
 // Register
 app.post('/api/auth/register', async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, captchaToken } = req.body;
+  
+  // Verify CAPTCHA if enabled
+  if (ENABLE_CAPTCHA) {
+    if (!captchaToken) {
+      return res.status(400).json({ error: 'CAPTCHA verification required' });
+    }
+    const captchaResult = await verifyCaptcha(captchaToken);
+    if (!captchaResult.success) {
+      return res.status(400).json({ error: captchaResult.error || 'CAPTCHA verification failed' });
+    }
+  }
   
   if (!name || !email || !password) {
     return res.status(400).json({ error: 'Name, email, and password are required' });
@@ -328,8 +406,19 @@ app.post('/api/auth/register', async (req, res) => {
 });
 
 // Login
-app.post('/api/auth/login', (req, res) => {
-  const { email, password } = req.body;
+app.post('/api/auth/login', async (req, res) => {
+  const { email, password, captchaToken } = req.body;
+  
+  // Verify CAPTCHA if enabled
+  if (ENABLE_CAPTCHA) {
+    if (!captchaToken) {
+      return res.status(400).json({ error: 'CAPTCHA verification required' });
+    }
+    const captchaResult = await verifyCaptcha(captchaToken);
+    if (!captchaResult.success) {
+      return res.status(400).json({ error: captchaResult.error || 'CAPTCHA verification failed' });
+    }
+  }
   
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required' });
@@ -355,6 +444,147 @@ app.post('/api/auth/login', (req, res) => {
       res.status(500).json({ error: error.message });
     }
   });
+});
+
+// Forgot password - request reset
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const { email, captchaToken } = req.body;
+  
+  // Verify CAPTCHA if enabled
+  if (ENABLE_CAPTCHA) {
+    if (!captchaToken) {
+      return res.status(400).json({ error: 'CAPTCHA verification required' });
+    }
+    const captchaResult = await verifyCaptcha(captchaToken);
+    if (!captchaResult.success) {
+      return res.status(400).json({ error: captchaResult.error || 'CAPTCHA verification failed' });
+    }
+  }
+  
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+
+  try {
+    // Check if user exists
+    db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user) => {
+      if (err) return res.status(500).json({ error: err.message });
+      
+      // Don't reveal if user exists or not for security
+      if (!user) {
+        return res.json({ message: 'If an account exists with this email, you will receive password reset instructions.' });
+      }
+
+      // Generate reset token
+      const resetToken = uuidv4();
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 1); // Token valid for 1 hour
+
+      // Save token to database
+      const tokenId = uuidv4();
+      db.run(
+        'INSERT INTO password_resets (id, user_id, token, expires_at) VALUES (?, ?, ?, ?)',
+        [tokenId, user.id, resetToken, expiresAt.toISOString()],
+        async function(err) {
+          if (err) return res.status(500).json({ error: err.message });
+
+          // Send reset email
+          const resetUrl = `${APP_URL}/reset-password?token=${resetToken}`;
+          const subject = 'Reset Your Dinkans Password';
+          const html = `<!DOCTYPE html>
+<html>
+<head><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;padding:20px}</style></head>
+<body>
+  <h2 style="color:#065f46">Password Reset Request</h2>
+  <p>Hello ${user.name},</p>
+  <p>You requested a password reset for your Dinkans account.</p>
+  <p><a href="${resetUrl}" style="background:#065f46;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block;margin:10px 0">Reset Password</a></p>
+  <p>Or copy this link: ${resetUrl}</p>
+  <p style="color:#6b7280;font-size:0.9rem">This link expires in 1 hour. If you didn't request this, please ignore this email.</p>
+  <p>Elevating Play, Building Community</p>
+</body>
+</html>`;
+          const text = `Hello ${user.name}, You requested a password reset. Click here: ${resetUrl} This link expires in 1 hour.`;
+
+          await sendEmail(user.email, subject, html, text);
+          
+          res.json({ message: 'If an account exists with this email, you will receive password reset instructions.' });
+        }
+      );
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Validate reset token
+app.get('/api/auth/validate-reset-token', (req, res) => {
+  const { token } = req.query;
+  
+  if (!token) {
+    return res.status(400).json({ error: 'Token is required' });
+  }
+
+  db.get(
+    'SELECT * FROM password_resets WHERE token = ? AND used = 0 AND expires_at > datetime("now")',
+    [token],
+    (err, reset) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!reset) return res.status(400).json({ error: 'Invalid or expired token' });
+      
+      res.json({ valid: true });
+    }
+  );
+});
+
+// Reset password with token
+app.post('/api/auth/reset-password', async (req, res) => {
+  const { token, password } = req.body;
+  
+  if (!token || !password) {
+    return res.status(400).json({ error: 'Token and password are required' });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  }
+
+  try {
+    // Validate token
+    db.get(
+      'SELECT * FROM password_resets WHERE token = ? AND used = 0 AND expires_at > datetime("now")',
+      [token],
+      async (err, reset) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!reset) return res.status(400).json({ error: 'Invalid or expired token' });
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Update user password
+        db.run(
+          'UPDATE users SET password = ? WHERE id = ?',
+          [hashedPassword, reset.user_id],
+          function(err) {
+            if (err) return res.status(500).json({ error: err.message });
+
+            // Mark token as used
+            db.run(
+              'UPDATE password_resets SET used = 1 WHERE id = ?',
+              [reset.id],
+              function(err) {
+                if (err) console.error('Error marking token as used:', err);
+              }
+            );
+
+            res.json({ message: 'Password reset successful. You can now log in with your new password.' });
+          }
+        );
+      }
+    );
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Get current user
