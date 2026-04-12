@@ -7,7 +7,11 @@ import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import Rules from './pages/Rules';
+import Feed from './pages/Feed';
+import PaddleCompare from './pages/PaddleCompare';
 import AppLayout from './AppLayout';
+import PublicLayout from './PublicLayout';
 import './App.css';
 
 function App() {
@@ -21,6 +25,11 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
+          
+          {/* Public Content Routes - No login required */}
+          <Route path="/rules" element={<PublicLayout><Rules /></PublicLayout>} />
+          <Route path="/feed" element={<PublicLayout><Feed /></PublicLayout>} />
+          <Route path="/paddles" element={<PublicLayout><PaddleCompare /></PublicLayout>} />
           
           {/* Protected App Routes */}
           <Route path="/app/*" element={

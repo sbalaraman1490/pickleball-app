@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Scale, Star, DollarSign, Check, X, ExternalLink, Filter, ChevronDown, ChevronUp, Info, RefreshCw, Globe, Database } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Scale, Star, DollarSign, Check, X, ExternalLink, Filter, ChevronDown, ChevronUp, Info, RefreshCw, Globe, Database, Lock, LogIn } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './PaddleCompare.css';
 
@@ -17,7 +18,9 @@ function PaddleCompare() {
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState([0, 300]);
   
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
+  const isLoggedIn = !!user;
+  const PUBLIC_PADDLE_LIMIT = 4;
 
   // Fetch paddles from API
   const fetchPaddles = async (showLoading = true) => {
@@ -100,8 +103,13 @@ function PaddleCompare() {
         break;
     }
 
+    // Limit to 4 paddles for non-logged-in users
+    if (!isLoggedIn && result.length > PUBLIC_PADDLE_LIMIT) {
+      result = result.slice(0, PUBLIC_PADDLE_LIMIT);
+    }
+
     return result;
-  }, [paddles, filterCategory, priceRange, sortBy]);
+  }, [paddles, filterCategory, priceRange, sortBy, isLoggedIn]);
 
   const togglePaddleSelection = (paddle) => {
     if (selectedPaddles.find(p => p.id === paddle.id)) {
@@ -179,6 +187,18 @@ function PaddleCompare() {
           <p className="last-updated">Last updated: {formatDate(lastUpdated)}</p>
         )}
       </div>
+
+      {/* Limited Access Banner for non-logged-in users */}
+      {!isLoggedIn && (
+        <div className="limited-access-banner">
+          <Lock size={18} />
+          <span>Preview Mode: Showing {PUBLIC_PADDLE_LIMIT} popular paddles. </span>
+          <Link to="/signup">Sign up free</Link>
+          <span>or</span>
+          <Link to="/login">Log in</Link>
+          <span>to see all {paddles.length}+ paddles!</span>
+        </div>
+      )}
 
       {error && (
         <div className="paddle-error">
@@ -419,6 +439,34 @@ function PaddleCompare() {
           </div>
         ))}
       </div>
+
+      {/* Login CTA for non-logged-in users */}
+      {!isLoggedIn && paddles.length > PUBLIC_PADDLE_LIMIT && (
+        <div className="login-cta-card">
+          <div className="login-cta-content">
+            <div className="login-cta-icon">
+              <Lock size={32} />
+            </div>
+            <h3>See All {paddles.length}+ Paddles</h3>
+            <p>Create a free account to unlock:</p>
+            <ul className="login-cta-features">
+              <li><Check size={16} /> Full paddle database with detailed specs</li>
+              <li><Check size={16} /> Compare up to 3 paddles side-by-side</li>
+              <li><Check size={16} /> Real-time pricing from multiple retailers</li>
+              <li><Check size={16} /> Community reviews and ratings</li>
+            </ul>
+            <div className="login-cta-buttons">
+              <Link to="/signup" className="btn btn-primary btn-lg">
+                <LogIn size={18} />
+                Create Free Account
+              </Link>
+              <Link to="/login" className="btn btn-secondary btn-lg">
+                Log In
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {filteredPaddles.length === 0 && (
         <div className="paddles-empty">

@@ -1,5 +1,6 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { BookOpen, MessageSquare, ShoppingBag, ArrowRight } from 'lucide-react';
 import './LandingPage.css';
 
 function LandingPage() {
@@ -129,23 +130,58 @@ function LandingPage() {
         <script async src="//www.instagram.com/embed.js"></script>
       </section>
 
+      {/* Public Features Section */}
+      <section className="features-section">
+        <h2 className="features-title">Free Resources</h2>
+        <p className="features-subtitle">No login required — explore our community resources</p>
+        <div className="features-grid">
+          <Link to="/rules" className="feature-card">
+            <div className="feature-icon-wrapper" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' }}>
+              <BookOpen size={32} color="white" />
+            </div>
+            <h3>Rules & Guide</h3>
+            <p>Learn pickleball basics, scoring, serving rules, kitchen etiquette, and more.</p>
+            <span className="feature-link">Learn the rules <ArrowRight size={16} /></span>
+          </Link>
+          
+          <Link to="/feed" className="feature-card">
+            <div className="feature-icon-wrapper" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
+              <MessageSquare size={32} color="white" />
+            </div>
+            <h3>Community Feed</h3>
+            <p>Latest news, tips, tournament updates, and community discussions.</p>
+            <span className="feature-link">Browse feed <ArrowRight size={16} /></span>
+          </Link>
+          
+          <Link to="/paddles" className="feature-card">
+            <div className="feature-icon-wrapper" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}>
+              <ShoppingBag size={32} color="white" />
+            </div>
+            <h3>Paddle Compare</h3>
+            <p>Compare paddles, prices, ratings, and find the best deals.</p>
+            <span className="feature-link">Compare paddles <ArrowRight size={16} /></span>
+          </Link>
+        </div>
+      </section>
+
       {/* CTA Buttons */}
       <section className="cta-section">
         <button className="cta-button primary animate-bounce" onClick={() => navigate('/login')}>
           Member Login
         </button>
-        <button className="cta-button secondary animate-pulse" onClick={() => navigate('/app')}>
-          Explore App
+        <button className="cta-button secondary animate-pulse" onClick={() => navigate('/signup')}>
+          Join Free
         </button>
       </section>
 
       {/* Footer Links */}
       <footer className="landing-footer">
         <div className="footer-links">
-          <a href="/app">Dashboard</a>
-          <a href="/app/games">Scheduler</a>
-          <a href="/app/expenses">Expenses</a>
-          <a href="/app/players">Players</a>
+          <Link to="/rules">Rules</Link>
+          <Link to="/feed">Feed</Link>
+          <Link to="/paddles">Paddles</Link>
+          <Link to="/login">Login</Link>
+          <Link to="/signup">Sign Up</Link>
         </div>
         <p className="footer-copyright">© 2026 Dinkans Pickleball Club</p>
       </footer>
