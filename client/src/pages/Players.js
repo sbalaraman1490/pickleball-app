@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, X } from 'lucide-react';
+import { apiFetch } from '../utils/api';
 
 function Players() {
   const [players, setPlayers] = useState([]);
@@ -19,8 +20,7 @@ function Players() {
 
   const fetchPlayers = async () => {
     try {
-      const response = await fetch('/api/players');
-      const data = await response.json();
+      const data = await apiFetch('/api/players');
       setPlayers(data);
     } catch (error) {
       console.error('Error fetching players:', error);
@@ -36,18 +36,15 @@ function Players() {
     const method = editingPlayer ? 'PUT' : 'POST';
     
     try {
-      const response = await fetch(url, {
+      await apiFetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
       
-      if (response.ok) {
-        setShowModal(false);
-        setEditingPlayer(null);
-        setFormData({ name: '', email: '', phone: '', skill_level: 'Beginner' });
-        fetchPlayers();
-      }
+      setShowModal(false);
+      setEditingPlayer(null);
+      setFormData({ name: '', email: '', phone: '', skill_level: 'Beginner' });
+      fetchPlayers();
     } catch (error) {
       console.error('Error saving player:', error);
     }
@@ -63,8 +60,8 @@ function Players() {
     if (!window.confirm('Are you sure you want to delete this player?')) return;
     
     try {
-      const response = await fetch(`/api/players/${id}`, { method: 'DELETE' });
-      if (response.ok) fetchPlayers();
+      await apiFetch(`/api/players/${id}`, { method: 'DELETE' });
+      fetchPlayers();
     } catch (error) {
       console.error('Error deleting player:', error);
     }

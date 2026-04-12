@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Plus, Edit2, Trash2, X, MapPin, DollarSign, Check } from 'lucide-react';
+import { apiFetch } from '../utils/api';
 
 function Games() {
   const [games, setGames] = useState([]);
@@ -25,8 +26,7 @@ function Games() {
 
   const fetchGames = async () => {
     try {
-      const response = await fetch('/api/games');
-      const data = await response.json();
+      const data = await apiFetch('/api/games');
       setGames(data);
     } catch (error) {
       console.error('Error fetching games:', error);
@@ -37,8 +37,7 @@ function Games() {
 
   const fetchPlayers = async () => {
     try {
-      const response = await fetch('/api/players');
-      const data = await response.json();
+      const data = await apiFetch('/api/players');
       setPlayers(data);
     } catch (error) {
       console.error('Error fetching players:', error);

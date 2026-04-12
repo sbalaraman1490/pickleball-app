@@ -3,6 +3,10 @@ const cors = require('cors');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const { v4: uuidv4 } = require('uuid');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+const JWT_SECRET = process.env.JWT_SECRET || 'dinkans-secret-key-change-in-production';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -76,20 +80,114 @@ db.serialize(() => {
     FOREIGN KEY (player_id) REFERENCES players(id),
     PRIMARY KEY (expense_id, player_id)
   )`);
+
+  // Users table for authentication
+  db.run(`CREATE TABLE IF NOT EXISTS users (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`);
+});
+
+// ========== AUTHENTICATION MIDDLEWARE & API ==========
+
+// Auth middleware
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  
+  if (!token) {
+    return res.status(401).json({ error: 'Access denied. No token provided.' });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.status(403).json({ error: 'Invalid token' });
+    req.user = user;
+    next();
+  });
+};
+
+// Register
+app.post('/api/auth/register', async (req, res) => {
+  const { name, email, password } = req.body;
+  
+  if (!name || !email || !password) {
+    return res.status(400).json({ error: 'Name, email, and password are required' });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const id = uuidv4();
+    
+    db.run(
+      'INSERT INTO users (id, name, email, password) VALUES (?, ?, ?, ?)',
+      [id, name, email, hashedPassword],
+      function(err) {
+        if (err) {
+          if (err.message.includes('UNIQUE constraint failed')) {
+            return res.status(400).json({ error: 'Email already registered' });
+          }
+          return res.status(500).json({ error: err.message });
+        }
+        
+        const token = jwt.sign({ id, email, name }, JWT_SECRET, { expiresIn: '7d' });
+        res.json({ id, name, email, token });
+      }
+    );
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Login
+app.post('/api/auth/login', (req, res) => {
+  const { email, password } = req.body;
+  
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
+  }
+
+  db.get('SELECT * FROM users WHERE email = ?', [email], async (err, user) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!user) return res.status(400).json({ error: 'Invalid email or password' });
+
+    try {
+      const validPassword = await bcrypt.compare(password, user.password);
+      if (!validPassword) {
+        return res.status(400).json({ error: 'Invalid email or password' });
+      }
+
+      const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
+      res.json({ id: user.id, name: user.name, email: user.email, token });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+});
+
+// Get current user
+app.get('/api/auth/me', authenticateToken, (req, res) => {
+  res.json({ id: req.user.id, email: req.user.email, name: req.user.name });
 });
 
 // ========== PLAYERS API ==========
 
-// Get all players
-app.get('/api/players', (req, res) => {
+// Get all players (protected)
+app.get('/api/players', authenticateToken, (req, res) => {
   db.all('SELECT * FROM players ORDER BY name', [], (err, rows) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json(rows);
   });
 });
 
-// Create player
-app.post('/api/players', (req, res) => {
+// Create player (protected)
+app.post('/api/players', authenticateToken, (req, res) => {
   const { name, email, phone, skill_level } = req.body;
   const id = uuidv4();
   
@@ -103,8 +201,8 @@ app.post('/api/players', (req, res) => {
   );
 });
 
-// Update player
-app.put('/api/players/:id', (req, res) => {
+// Update player (protected)
+app.put('/api/players/:id', authenticateToken, (req, res) => {
   const { name, email, phone, skill_level } = req.body;
   
   db.run(
@@ -117,8 +215,8 @@ app.put('/api/players/:id', (req, res) => {
   );
 });
 
-// Delete player
-app.delete('/api/players/:id', (req, res) => {
+// Delete player (protected)
+app.delete('/api/players/:id', authenticateToken, (req, res) => {
   db.run('DELETE FROM players WHERE id = ?', [req.params.id], function(err) {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ message: 'Player deleted' });
@@ -127,8 +225,8 @@ app.delete('/api/players/:id', (req, res) => {
 
 // ========== GAMES API ==========
 
-// Get all games with players
-app.get('/api/games', (req, res) => {
+// Get all games with players (protected)
+app.get('/api/games', authenticateToken, (req, res) => {
   db.all('SELECT * FROM games ORDER BY date DESC, time DESC', [], (err, games) => {
     if (err) return res.status(500).json({ error: err.message });
     
@@ -158,8 +256,8 @@ app.get('/api/games', (req, res) => {
   });
 });
 
-// Create game
-app.post('/api/games', (req, res) => {
+// Create game (protected)
+app.post('/api/games', authenticateToken, (req, res) => {
   const { date, time, location, court_fee, notes, player_ids } = req.body;
   const id = uuidv4();
   
@@ -183,8 +281,8 @@ app.post('/api/games', (req, res) => {
   );
 });
 
-// Update game
-app.put('/api/games/:id', (req, res) => {
+// Update game (protected)
+app.put('/api/games/:id', authenticateToken, (req, res) => {
   const { date, time, location, court_fee, status, notes, player_ids } = req.body;
   
   db.run(
@@ -209,8 +307,8 @@ app.put('/api/games/:id', (req, res) => {
   );
 });
 
-// Delete game
-app.delete('/api/games/:id', (req, res) => {
+// Delete game (protected)
+app.delete('/api/games/:id', authenticateToken, (req, res) => {
   db.run('DELETE FROM game_players WHERE game_id = ?', [req.params.id], function(err) {
     db.run('DELETE FROM expenses WHERE game_id = ?', [req.params.id], function(err) {
       db.run('DELETE FROM games WHERE id = ?', [req.params.id], function(err) {
@@ -221,8 +319,8 @@ app.delete('/api/games/:id', (req, res) => {
   });
 });
 
-// Update game score
-app.put('/api/games/:id/score', (req, res) => {
+// Update game score (protected)
+app.put('/api/games/:id/score', authenticateToken, (req, res) => {
   const { player_id, score, team } = req.body;
   
   db.run(
@@ -235,8 +333,8 @@ app.put('/api/games/:id/score', (req, res) => {
   );
 });
 
-// Mark player payment
-app.put('/api/games/:id/payment', (req, res) => {
+// Mark player payment (protected)
+app.put('/api/games/:id/payment', authenticateToken, (req, res) => {
   const { player_id, paid } = req.body;
   
   db.run(
@@ -251,8 +349,8 @@ app.put('/api/games/:id/payment', (req, res) => {
 
 // ========== EXPENSES API ==========
 
-// Get all expenses with details
-app.get('/api/expenses', (req, res) => {
+// Get all expenses with details (protected)
+app.get('/api/expenses', authenticateToken, (req, res) => {
   db.all(
     `SELECT e.*, g.location as game_location, p.name as payer_name 
      FROM expenses e 
@@ -290,8 +388,8 @@ app.get('/api/expenses', (req, res) => {
   );
 });
 
-// Create expense
-app.post('/api/expenses', (req, res) => {
+// Create expense (protected)
+app.post('/api/expenses', authenticateToken, (req, res) => {
   const { date, category, description, amount, game_id, payer_id, split_among_all, splits } = req.body;
   const id = uuidv4();
   
@@ -315,8 +413,8 @@ app.post('/api/expenses', (req, res) => {
   );
 });
 
-// Update expense
-app.put('/api/expenses/:id', (req, res) => {
+// Update expense (protected)
+app.put('/api/expenses/:id', authenticateToken, (req, res) => {
   const { date, category, description, amount, game_id, payer_id, split_among_all, splits } = req.body;
   
   db.run(
@@ -341,8 +439,8 @@ app.put('/api/expenses/:id', (req, res) => {
   );
 });
 
-// Delete expense
-app.delete('/api/expenses/:id', (req, res) => {
+// Delete expense (protected)
+app.delete('/api/expenses/:id', authenticateToken, (req, res) => {
   db.run('DELETE FROM expense_splits WHERE expense_id = ?', [req.params.id], function(err) {
     db.run('DELETE FROM expenses WHERE id = ?', [req.params.id], function(err) {
       if (err) return res.status(500).json({ error: err.message });
@@ -351,8 +449,8 @@ app.delete('/api/expenses/:id', (req, res) => {
   });
 });
 
-// Mark split as paid
-app.put('/api/expenses/:id/payment', (req, res) => {
+// Mark split as paid (protected)
+app.put('/api/expenses/:id/payment', authenticateToken, (req, res) => {
   const { player_id, paid } = req.body;
   
   db.run(
@@ -367,7 +465,8 @@ app.put('/api/expenses/:id/payment', (req, res) => {
 
 // ========== DASHBOARD API ==========
 
-app.get('/api/dashboard', (req, res) => {
+// Dashboard (protected)
+app.get('/api/dashboard', authenticateToken, (req, res) => {
   const dashboard = {};
   
   // Total games
@@ -407,7 +506,8 @@ app.get('/api/dashboard', (req, res) => {
 
 // ========== BALANCE SHEET API ==========
 
-app.get('/api/balances', (req, res) => {
+// Balance sheet (protected)
+app.get('/api/balances', authenticateToken, (req, res) => {
   db.all('SELECT id, name FROM players', [], (err, players) => {
     if (err) return res.status(500).json({ error: err.message });
     

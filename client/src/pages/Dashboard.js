@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Calendar, Users, Receipt, DollarSign, ChevronRight } from 'lucide-react';
+import { apiFetch } from '../utils/api';
 
 function Dashboard() {
   const [stats, setStats] = useState(null);
@@ -12,8 +13,7 @@ function Dashboard() {
 
   const fetchDashboard = async () => {
     try {
-      const response = await fetch('/api/dashboard');
-      const data = await response.json();
+      const data = await apiFetch('/api/dashboard');
       setStats(data);
     } catch (error) {
       console.error('Error fetching dashboard:', error);

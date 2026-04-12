@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowUpRight, ArrowDownRight, DollarSign } from 'lucide-react';
+import { apiFetch } from '../utils/api';
 
 function Balances() {
   const [balances, setBalances] = useState({});
@@ -11,8 +12,7 @@ function Balances() {
 
   const fetchBalances = async () => {
     try {
-      const response = await fetch('/api/balances');
-      const data = await response.json();
+      const data = await apiFetch('/api/balances');
       setBalances(data);
     } catch (error) {
       console.error('Error fetching balances:', error);
