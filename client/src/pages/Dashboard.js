@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Calendar, Users, Receipt, DollarSign, ChevronRight } from 'lucide-react';
+import { Calendar, Users, Receipt, DollarSign, ChevronRight, TrendingUp } from 'lucide-react';
 import { apiFetch } from '../utils/api';
 
 function Dashboard() {
@@ -22,33 +22,83 @@ function Dashboard() {
     }
   };
 
-  if (loading) return <div className="card">Loading...</div>;
+  if (loading) {
+    return (
+      <div>
+        <div className="page-header">
+          <div className="skeleton skeleton-title" style={{ width: '200px' }} />
+          <div className="skeleton skeleton-text" style={{ width: '300px' }} />
+        </div>
+        <div className="stats-grid">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="stat-card" style={{ animation: 'none' }}>
+              <div className="skeleton" style={{ width: '80px', height: '14px', marginBottom: '12px' }} />
+              <div className="skeleton" style={{ width: '60px', height: '32px' }} />
+            </div>
+          ))}
+        </div>
+        <div className="card">
+          <div className="skeleton skeleton-title" style={{ width: '150px', marginBottom: '20px' }} />
+          <div className="skeleton skeleton-text" style={{ width: '100%', marginBottom: '10px' }} />
+          <div className="skeleton skeleton-text" style={{ width: '80%', marginBottom: '10px' }} />
+          <div className="skeleton skeleton-text" style={{ width: '60%' }} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
-      <div className="page-header">
+      <div className="page-header animate-fade-in">
         <h1>Dashboard</h1>
         <p>Overview of your pickleball activities</p>
       </div>
 
       <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-label">Total Games</div>
-          <div className="stat-value">{stats?.totalGames || 0}</div>
+        <div className="stat-card stagger-1">
+          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' }}>
+            <Calendar size={24} color="white" />
+          </div>
+          <div className="stat-content">
+            <div className="stat-label">Total Games</div>
+            <div className="stat-value">{stats?.totalGames || 0}</div>
+            <div className="stat-trend">
+              <TrendingUp size={14} />
+              <span>Active season</span>
+            </div>
+          </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-label">Active Players</div>
-          <div className="stat-value">{stats?.totalPlayers || 0}</div>
+        <div className="stat-card stagger-2">
+          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
+            <Users size={24} color="white" />
+          </div>
+          <div className="stat-content">
+            <div className="stat-label">Active Players</div>
+            <div className="stat-value">{stats?.totalPlayers || 0}</div>
+            <div className="stat-trend">
+              <TrendingUp size={14} />
+              <span>Growing community</span>
+            </div>
+          </div>
         </div>
-        <div className="stat-card">
-          <div className="stat-label">Total Expenses</div>
-          <div className="stat-value">
-            ${(stats?.totalExpenses || 0).toFixed(2)}
+        <div className="stat-card stagger-3">
+          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' }}>
+            <Receipt size={24} color="white" />
+          </div>
+          <div className="stat-content">
+            <div className="stat-label">Total Expenses</div>
+            <div className="stat-value">
+              ${(stats?.totalExpenses || 0).toFixed(2)}
+            </div>
+            <div className="stat-trend">
+              <DollarSign size={14} />
+              <span>Tracked expenses</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="card">
+      <div className="card stagger-4">
         <div className="card-header">
           <h3 className="card-title">
             <Calendar size={20} style={{ display: 'inline', marginRight: 8 }} />
@@ -92,7 +142,7 @@ function Dashboard() {
         )}
       </div>
 
-      <div className="card">
+      <div className="card stagger-5">
         <div className="card-header">
           <h3 className="card-title">
             <Receipt size={20} style={{ display: 'inline', marginRight: 8 }} />
