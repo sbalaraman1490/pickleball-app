@@ -1,6 +1,103 @@
 .app {
   display: flex;
   min-height: 100vh;
+  padding-top: 60px; /* Space for fixed header */
+}
+
+/* Top Header */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.header-spacer {
+  width: 260px; /* Match sidebar width */
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.user-info:hover {
+  background: #f3f4f6;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  background: #065f46;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 0.95rem;
+}
+
+.user-role {
+  font-size: 0.75rem;
+  color: #065f46;
+  background: #d1fae5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.logout-btn-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: #fee2e2;
+  border: none;
+  border-radius: 8px;
+  color: #dc2626;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.logout-btn-header:hover {
+  background: #fecaca;
+  transform: scale(1.05);
 }
 
 .sidebar {
@@ -8,7 +105,9 @@
   background: #1a202c;
   color: white;
   position: fixed;
-  height: 100vh;
+  top: 60px; /* Below header */
+  bottom: 0;
+  left: 0;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
@@ -113,8 +212,8 @@
 .main-content {
   flex: 1;
   margin-left: 260px;
-  padding: 32px;
-  min-height: 100vh;
+  padding: 24px 32px 32px;
+  min-height: calc(100vh - 60px);
 }
 
 .page-header {

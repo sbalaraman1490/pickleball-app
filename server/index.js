@@ -222,6 +222,70 @@ app.get('/api/auth/me', authenticateToken, (req, res) => {
   res.json({ id: req.user.id, email: req.user.email, name: req.user.name, role: req.user.role });
 });
 
+// Update profile
+app.put('/api/auth/profile', authenticateToken, (req, res) => {
+  const { name, email } = req.body;
+  
+  if (!name || !email) {
+    return res.status(400).json({ error: 'Name and email are required' });
+  }
+
+  db.run(
+    'UPDATE users SET name = ?, email = ? WHERE id = ?',
+    [name, email, req.user.id],
+    function(err) {
+      if (err) {
+        if (err.message.includes('UNIQUE constraint failed')) {
+          return res.status(400).json({ error: 'Email already in use' });
+        }
+        return res.status(500).json({ error: err.message });
+      }
+      res.json({ id: req.user.id, name, email, role: req.user.role });
+    }
+  );
+});
+
+// Change password
+app.put('/api/auth/password', authenticateToken, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ error: 'Current password and new password are required' });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ error: 'New password must be at least 6 characters' });
+  }
+
+  try {
+    // Get current user with password
+    db.get('SELECT * FROM users WHERE id = ?', [req.user.id], async (err, user) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!user) return res.status(404).json({ error: 'User not found' });
+
+      // Verify current password
+      const validPassword = await bcrypt.compare(currentPassword, user.password);
+      if (!validPassword) {
+        return res.status(400).json({ error: 'Current password is incorrect' });
+      }
+
+      // Hash and save new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      
+      db.run(
+        'UPDATE users SET password = ? WHERE id = ?',
+        [hashedPassword, req.user.id],
+        function(err) {
+          if (err) return res.status(500).json({ error: err.message });
+          res.json({ message: 'Password changed successfully' });
+        }
+      );
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // ========== ADMIN API ==========
 
 // Get all users (admin only)
