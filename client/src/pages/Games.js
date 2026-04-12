@@ -9,6 +9,9 @@ function Games() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingGame, setEditingGame] = useState(null);
+  const [recordingPayment, setRecordingPayment] = useState(null);
+  const [paymentAmount, setPaymentAmount] = useState('');
+  const [selectedPayer, setSelectedPayer] = useState('');
   const [selectedTab, setSelectedTab] = useState('upcoming');
   const [formData, setFormData] = useState({
     date: '',
@@ -51,20 +54,50 @@ function Games() {
     const method = editingGame ? 'PUT' : 'POST';
     
     try {
-      const response = await fetch(url, {
+      await apiFetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
       
-      if (response.ok) {
-        setShowModal(false);
-        setEditingGame(null);
-        setFormData({ date: '', time: '', location: '', court_fee: 0, notes: '', player_ids: [] });
-        fetchGames();
-      }
+      setShowModal(false);
+      setEditingGame(null);
+      setFormData({ date: '', time: '', location: '', court_fee: 0, notes: '', player_ids: [] });
+      fetchGames();
     } catch (error) {
       console.error('Error saving game:', error);
+    }
+  };
+
+  const handleRecordPayment = async (e) => {
+    e.preventDefault();
+    
+    const amount = parseFloat(paymentAmount);
+    if (!amount || amount <= 0) {
+      alert('Please enter a valid amount greater than 0');
+      return;
+    }
+    if (!selectedPayer) {
+      alert('Please select who paid');
+      return;
+    }
+
+    try {
+      await apiFetch(`/api/games/${recordingPayment.id}/record-payment`, {
+        method: 'POST',
+        body: JSON.stringify({
+          payer_id: selectedPayer,
+          amount: amount,
+          date: recordingPayment.date
+        })
+      });
+      
+      setRecordingPayment(null);
+      setPaymentAmount('');
+      setSelectedPayer('');
+      fetchGames();
+    } catch (error) {
+      console.error('Error recording payment:', error);
+      alert('Failed to record payment: ' + error.message);
     }
   };
 
@@ -85,21 +118,26 @@ function Games() {
     if (!window.confirm('Are you sure you want to delete this game?')) return;
     
     try {
-      const response = await fetch(`/api/games/${id}`, { method: 'DELETE' });
-      if (response.ok) fetchGames();
+      await apiFetch(`/api/games/${id}`, { method: 'DELETE' });
+      fetchGames();
     } catch (error) {
       console.error('Error deleting game:', error);
     }
   };
 
+  const openPaymentModal = (game) => {
+    setRecordingPayment(game);
+    setPaymentAmount(game.court_fee > 0 ? game.court_fee.toString() : '');
+    setSelectedPayer(game.players?.find(p => p.paid)?.player_id || '');
+  };
+
   const togglePlayerPayment = async (gameId, playerId, currentPaid) => {
     try {
-      const response = await fetch(`/api/games/${gameId}/payment`, {
+      await apiFetch(`/api/games/${gameId}/payment`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ player_id: playerId, paid: !currentPaid })
       });
-      if (response.ok) fetchGames();
+      fetchGames();
     } catch (error) {
       console.error('Error updating payment:', error);
     }
@@ -205,11 +243,14 @@ function Games() {
                       <span 
                         key={p.player_id} 
                         className={`game-player-tag ${p.paid ? 'paid' : ''}`}
-                        title={p.paid ? 'Paid' : 'Not paid - Click to toggle'}
+                        title={p.paid ? `Paid $${p.payment_amount || 0}` : 'Not paid - Click to toggle'}
                         onClick={() => togglePlayerPayment(game.id, p.player_id, p.paid)}
                         style={{ cursor: 'pointer' }}
                       >
                         {p.name}
+                        {p.paid && p.payment_amount > 0 && (
+                          <span className="payment-amount"> ${p.payment_amount.toFixed(2)}</span>
+                        )}
                       </span>
                     ))}
                   </div>
@@ -221,6 +262,13 @@ function Games() {
                     Court Fee: <strong>${(game.court_fee || 0).toFixed(2)}</strong>
                   </div>
                   <div className="game-card-actions">
+                    <button 
+                      className="btn btn-success btn-sm" 
+                      onClick={() => openPaymentModal(game)}
+                      title="Record Payment"
+                    >
+                      <DollarSign size={14} />
+                    </button>
                     <button className="btn btn-secondary btn-sm" onClick={() => handleEdit(game)}>
                       <Edit2 size={14} />
                     </button>
@@ -349,6 +397,71 @@ function Games() {
                 </button>
                 <button type="submit" className="btn btn-primary">
                   {editingGame ? 'Save Changes' : 'Schedule Game'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Payment Recording Modal */}
+      {recordingPayment && (
+        <div className="modal-overlay" onClick={() => setRecordingPayment(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">Record Game Payment</h3>
+              <button className="modal-close" onClick={() => setRecordingPayment(null)}>
+                <X size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleRecordPayment}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label className="form-label">Game</label>
+                  <p style={{ margin: '0 0 15px', color: '#4a5568' }}>
+                    {format(new Date(recordingPayment.date), 'MMM d, yyyy')} at {recordingPayment.time} - {recordingPayment.location}
+                  </p>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Who Paid? *</label>
+                  <select
+                    className="form-select"
+                    value={selectedPayer}
+                    onChange={e => setSelectedPayer(e.target.value)}
+                    required
+                  >
+                    <option value="">Select player</option>
+                    {recordingPayment.players?.map(p => (
+                      <option key={p.player_id} value={p.player_id}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Amount Paid ($) *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    className="form-input"
+                    value={paymentAmount}
+                    onChange={e => setPaymentAmount(e.target.value)}
+                    placeholder="Enter amount (e.g., 40.00)"
+                    required
+                  />
+                  <p className="form-text" style={{ marginTop: '8px', color: '#718096', fontSize: '0.85rem' }}>
+                    This will create an expense entry split equally among {recordingPayment.players?.length || 0} players.
+                    {paymentAmount && recordingPayment.players?.length > 0 && (
+                      <span> Each player owes: <strong>${(parseFloat(paymentAmount) / recordingPayment.players.length).toFixed(2)}</strong></span>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setRecordingPayment(null)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-success">
+                  Record Payment & Create Expense
                 </button>
               </div>
             </form>

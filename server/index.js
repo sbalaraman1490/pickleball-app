@@ -50,6 +50,7 @@ db.serialize(() => {
     team INTEGER DEFAULT 1,
     score INTEGER DEFAULT 0,
     paid BOOLEAN DEFAULT 0,
+    payment_amount REAL DEFAULT 0,
     FOREIGN KEY (game_id) REFERENCES games(id),
     FOREIGN KEY (player_id) REFERENCES players(id),
     PRIMARY KEY (game_id, player_id)
@@ -335,16 +336,78 @@ app.put('/api/games/:id/score', authenticateToken, (req, res) => {
 
 // Mark player payment (protected)
 app.put('/api/games/:id/payment', authenticateToken, (req, res) => {
-  const { player_id, paid } = req.body;
+  const { player_id, paid, amount } = req.body;
   
   db.run(
-    'UPDATE game_players SET paid = ? WHERE game_id = ? AND player_id = ?',
-    [paid ? 1 : 0, req.params.id, player_id],
+    'UPDATE game_players SET paid = ?, payment_amount = ? WHERE game_id = ? AND player_id = ?',
+    [paid ? 1 : 0, amount || 0, req.params.id, player_id],
     function(err) {
       if (err) return res.status(500).json({ error: err.message });
       res.json({ message: 'Payment status updated' });
     }
   );
+});
+
+// Record game payment and create expense (protected)
+app.post('/api/games/:id/record-payment', authenticateToken, (req, res) => {
+  const { payer_id, amount, date } = req.body;
+  const gameId = req.params.id;
+  
+  if (!amount || amount <= 0) {
+    return res.status(400).json({ error: 'Amount must be greater than 0' });
+  }
+  
+  // Get game details and all players
+  db.get('SELECT * FROM games WHERE id = ?', [gameId], (err, game) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!game) return res.status(404).json({ error: 'Game not found' });
+    
+    db.all('SELECT player_id FROM game_players WHERE game_id = ?', [gameId], (err, gamePlayers) => {
+      if (err) return res.status(500).json({ error: err.message });
+      
+      const playerIds = gamePlayers.map(gp => gp.player_id);
+      if (playerIds.length === 0) {
+        return res.status(400).json({ error: 'No players in this game' });
+      }
+      
+      // Create expense
+      const expenseId = uuidv4();
+      const expenseDate = date || game.date;
+      const splitAmount = amount / playerIds.length;
+      
+      db.run(
+        `INSERT INTO expenses (id, date, category, description, amount, game_id, payer_id, split_among_all) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [expenseId, expenseDate, 'Court Fee', `Court fee for ${game.location} on ${game.date}`, amount, gameId, payer_id, 1],
+        function(err) {
+          if (err) return res.status(500).json({ error: err.message });
+          
+          // Create splits for all players
+          const stmt = db.prepare('INSERT INTO expense_splits (expense_id, player_id, amount) VALUES (?, ?, ?)');
+          playerIds.forEach(pid => {
+            stmt.run(expenseId, pid, splitAmount);
+          });
+          stmt.finalize();
+          
+          // Mark the payer as having paid the full amount
+          db.run(
+            'UPDATE game_players SET paid = 1, payment_amount = ? WHERE game_id = ? AND player_id = ?',
+            [amount, gameId, payer_id],
+            function(err) {
+              if (err) return res.status(500).json({ error: err.message });
+              res.json({ 
+                message: 'Payment recorded and expense created', 
+                expense_id: expenseId,
+                amount: amount,
+                split_amount: splitAmount,
+                splits_count: playerIds.length
+              });
+            }
+          );
+        }
+      );
+    });
+  });
 });
 
 // ========== EXPENSES API ==========
