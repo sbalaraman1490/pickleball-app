@@ -1,4 +1,4 @@
-# PickleBall Manager
+# Dinkans - Pickleball Manager
 
 A full-stack application for managing pickleball games and tracking shared expenses.
 
@@ -172,7 +172,7 @@ pickleball-app/
 The SQLite database file at `server/pickleball.db` contains all your data. Back it up regularly:
 
 ```bash
-cp server/pickleball.db backup/pickleball-$(date +%Y%m%d).db
+cp server/pickleball.db backup/dinkans-$(date +%Y%m%d).db
 ```
 
 ## License

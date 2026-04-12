@@ -1,7 +1,7 @@
 {
-  "name": "pickleball-app",
+  "name": "dinkans",
   "version": "1.0.0",
-  "description": "Pickleball Game Management and Expenses Ledger",
+  "description": "Dinkans - Pickleball Game Management and Expenses Ledger",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "server": "nodemon server/index.js",
