@@ -8,6 +8,142 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dinkans-secret-key-change-in-production';
 
+// Email Configuration
+const SMTP_HOST = process.env.SMTP_HOST;
+const SMTP_PORT = process.env.SMTP_PORT || 587;
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASS = process.env.SMTP_PASS;
+const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@dinkans.com';
+const APP_URL = process.env.APP_URL || 'https://www.dinkans.com';
+
+// Simple email sender function (uses SMTP if configured, otherwise logs)
+async function sendEmail(to, subject, htmlContent, textContent) {
+  // If no SMTP configured, just log the email (for development)
+  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
+    console.log('📧 EMAIL (Not sent - no SMTP configured):');
+    console.log(`To: ${to}`);
+    console.log(`Subject: ${subject}`);
+    console.log(`Text: ${textContent}`);
+    return { success: false, message: 'SMTP not configured - email logged only' };
+  }
+
+  try {
+    // Dynamic import of nodemailer
+    const nodemailer = require('nodemailer');
+    
+    const transporter = nodemailer.createTransporter({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_PORT === 465,
+      auth: {
+        user: SMTP_USER,
+        pass: SMTP_PASS
+      }
+    });
+
+    const info = await transporter.sendMail({
+      from: `"Dinkans" <${FROM_EMAIL}>`,
+      to,
+      subject,
+      text: textContent,
+      html: htmlContent
+    });
+
+    console.log('📧 Email sent:', info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('📧 Email error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Email templates
+function getRegistrationEmail(name, status) {
+  const subject = status === 'approved' 
+    ? 'Welcome to Dinkans - Your Account is Ready!'
+    : 'Welcome to Dinkans - Account Pending Approval';
+  
+  const html = status === 'approved'
+    ? `<!DOCTYPE html>
+<html>
+<head><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;padding:20px}</style></head>
+<body>
+  <h2 style="color:#065f46">Welcome to Dinkans, ${name}!</h2>
+  <p>Your account has been created and is ready to use.</p>
+  <p><a href="${APP_URL}/login" style="background:#065f46;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block;margin:10px 0">Login Now</a></p>
+  <p>Elevating Play, Building Community</p>
+</body>
+</html>`
+    : `<!DOCTYPE html>
+<html>
+<head><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;padding:20px}</style></head>
+<body>
+  <h2 style="color:#065f46">Welcome to Dinkans, ${name}!</h2>
+  <p>Thank you for registering. Your account is currently pending admin approval.</p>
+  <p>You will receive another email once your account has been approved.</p>
+  <p>Elevating Play, Building Community</p>
+</body>
+</html>`;
+
+  const text = status === 'approved'
+    ? `Welcome to Dinkans, ${name}! Your account is ready. Login at ${APP_URL}/login`
+    : `Welcome to Dinkans, ${name}! Your account is pending approval. You'll be notified once approved.`;
+
+  return { subject, html, text };
+}
+
+function getApprovalEmail(name, approved, adminName) {
+  const status = approved ? 'Approved' : 'Rejected';
+  const color = approved ? '#059669' : '#dc2626';
+  const action = approved ? 'approved' : 'rejected';
+  const nextStep = approved 
+    ? `<p>You can now <a href="${APP_URL}/login" style="background:#065f46;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block;margin:10px 0">Login to Dinkans</a></p>`
+    : '<p>If you believe this was a mistake, please contact an administrator.</p>';
+  
+  const subject = `Dinkans Account ${status}`;
+  const html = `<!DOCTYPE html>
+<html>
+<head><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;padding:20px}</style></head>
+<body>
+  <h2 style="color:${color}">Account ${status}</h2>
+  <p>Hello ${name},</p>
+  <p>Your Dinkans account has been <strong style="color:${color}">${action}</strong> by ${adminName}.</p>
+  ${nextStep}
+  <p>Elevating Play, Building Community</p>
+</body>
+</html>`;
+
+  const text = `Hello ${name}, Your Dinkans account has been ${action} by ${adminName}. ${approved ? `Login at ${APP_URL}/login` : 'Contact an administrator if you believe this was a mistake.'}`;
+
+  return { subject, html, text };
+}
+
+function getExpenseEmail(userName, expenseDetails, status, adminName) {
+  const statusColor = status === 'approved' ? '#059669' : '#dc2626';
+  const subject = `Expense ${status === 'approved' ? 'Approved' : 'Rejected'} - Dinkans`;
+  
+  const html = `<!DOCTYPE html>
+<html>
+<head><style>body{font-family:Arial,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;padding:20px}</style></head>
+<body>
+  <h2 style="color:${statusColor}">Expense ${status === 'approved' ? 'Approved' : 'Rejected'}</h2>
+  <p>Hello ${userName},</p>
+  <p>Your expense has been <strong style="color:${statusColor}">${status}</strong> by ${adminName}.</p>
+  <div style="background:#f8fafc;padding:16px;border-radius:8px;margin:16px 0">
+    <p><strong>Amount:</strong> $${expenseDetails.amount}</p>
+    <p><strong>Category:</strong> ${expenseDetails.category}</p>
+    <p><strong>Description:</strong> ${expenseDetails.description || 'N/A'}</p>
+  </div>
+  <p><a href="${APP_URL}/app/expenses" style="background:#065f46;color:white;padding:12px 24px;text-decoration:none;border-radius:6px;display:inline-block;margin:10px 0">View Expenses</a></p>
+  <p>Elevating Play, Building Community</p>
+</body>
+</html>`;
+
+  const text = `Hello ${userName}, Your expense ($${expenseDetails.amount} - ${expenseDetails.category}) has been ${status} by ${adminName}. View at ${APP_URL}/app/expenses`;
+
+  return { subject, html, text };
+}
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -171,6 +307,10 @@ app.post('/api/auth/register', async (req, res) => {
             ? 'Registration successful. You are the admin user.'
             : 'Registration successful. Please wait for admin approval before logging in.';
           
+          // Send welcome email
+          const emailTemplate = getRegistrationEmail(name, approved === 1 ? 'approved' : 'pending');
+          sendEmail(email, emailTemplate.subject, emailTemplate.html, emailTemplate.text);
+          
           res.json({ 
             id, 
             name, 
@@ -298,14 +438,28 @@ app.get('/api/admin/users', authenticateToken, requireAdmin, (req, res) => {
 
 // Approve user (admin only)
 app.put('/api/admin/users/:id/approve', authenticateToken, requireAdmin, (req, res) => {
-  db.run(
-    'UPDATE users SET approved = 1 WHERE id = ?',
-    [req.params.id],
-    function(err) {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json({ message: 'User approved successfully' });
-    }
-  );
+  const userId = req.params.id;
+  const adminName = req.user.name;
+  
+  // Get user details before approving
+  db.get('SELECT * FROM users WHERE id = ?', [userId], (err, user) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    
+    db.run(
+      'UPDATE users SET approved = 1 WHERE id = ?',
+      [userId],
+      function(err) {
+        if (err) return res.status(500).json({ error: err.message });
+        
+        // Send approval email
+        const emailTemplate = getApprovalEmail(user.name, true, adminName);
+        sendEmail(user.email, emailTemplate.subject, emailTemplate.html, emailTemplate.text);
+        
+        res.json({ message: 'User approved successfully' });
+      }
+    );
+  });
 });
 
 // Reject/Delete user (admin only)
@@ -315,9 +469,23 @@ app.delete('/api/admin/users/:id', authenticateToken, requireAdmin, (req, res) =
     return res.status(400).json({ error: 'Cannot delete your own account' });
   }
   
-  db.run('DELETE FROM users WHERE id = ?', [req.params.id], function(err) {
+  const userId = req.params.id;
+  const adminName = req.user.name;
+  
+  // Get user details before deleting for rejection email
+  db.get('SELECT * FROM users WHERE id = ?', [userId], (err, user) => {
     if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: 'User deleted successfully' });
+    
+    // If user was pending (not approved), send rejection email
+    if (user && !user.approved) {
+      const emailTemplate = getApprovalEmail(user.name, false, adminName);
+      sendEmail(user.email, emailTemplate.subject, emailTemplate.html, emailTemplate.text);
+    }
+    
+    db.run('DELETE FROM users WHERE id = ?', [userId], function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: 'User deleted successfully' });
+    });
   });
 });
 
@@ -430,24 +598,78 @@ app.get('/api/admin/expenses/pending', authenticateToken, requireAdmin, (req, re
 
 // Approve expense (admin only)
 app.put('/api/admin/expenses/:id/approve', authenticateToken, requireAdmin, (req, res) => {
-  db.run(
-    'UPDATE expenses SET status = ?, approved_by = ?, approved_at = datetime("now") WHERE id = ?',
-    ['approved', req.user.id, req.params.id],
-    function(err) {
+  const expenseId = req.params.id;
+  const adminName = req.user.name;
+  
+  // Get expense and creator details
+  db.get(
+    `SELECT e.*, u.name as creator_name, u.email as creator_email 
+     FROM expenses e 
+     JOIN users u ON e.created_by = u.id 
+     WHERE e.id = ?`,
+    [expenseId],
+    (err, expense) => {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ message: 'Expense approved successfully' });
+      
+      db.run(
+        'UPDATE expenses SET status = ?, approved_by = ?, approved_at = datetime("now") WHERE id = ?',
+        ['approved', req.user.id, expenseId],
+        function(err) {
+          if (err) return res.status(500).json({ error: err.message });
+          
+          // Send email notification to expense creator
+          if (expense && expense.creator_email) {
+            const emailTemplate = getExpenseEmail(
+              expense.creator_name,
+              { amount: expense.amount, category: expense.category, description: expense.description },
+              'approved',
+              adminName
+            );
+            sendEmail(expense.creator_email, emailTemplate.subject, emailTemplate.html, emailTemplate.text);
+          }
+          
+          res.json({ message: 'Expense approved successfully' });
+        }
+      );
     }
   );
 });
 
 // Reject expense (admin only)
 app.put('/api/admin/expenses/:id/reject', authenticateToken, requireAdmin, (req, res) => {
-  db.run(
-    'UPDATE expenses SET status = ? WHERE id = ?',
-    ['rejected', req.params.id],
-    function(err) {
+  const expenseId = req.params.id;
+  const adminName = req.user.name;
+  
+  // Get expense and creator details
+  db.get(
+    `SELECT e.*, u.name as creator_name, u.email as creator_email 
+     FROM expenses e 
+     JOIN users u ON e.created_by = u.id 
+     WHERE e.id = ?`,
+    [expenseId],
+    (err, expense) => {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ message: 'Expense rejected' });
+      
+      db.run(
+        'UPDATE expenses SET status = ? WHERE id = ?',
+        ['rejected', expenseId],
+        function(err) {
+          if (err) return res.status(500).json({ error: err.message });
+          
+          // Send email notification to expense creator
+          if (expense && expense.creator_email) {
+            const emailTemplate = getExpenseEmail(
+              expense.creator_name,
+              { amount: expense.amount, category: expense.category, description: expense.description },
+              'rejected',
+              adminName
+            );
+            sendEmail(expense.creator_email, emailTemplate.subject, emailTemplate.html, emailTemplate.text);
+          }
+          
+          res.json({ message: 'Expense rejected' });
+        }
+      );
     }
   );
 });
