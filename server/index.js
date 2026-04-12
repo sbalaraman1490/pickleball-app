@@ -279,6 +279,50 @@ app.put('/api/admin/users/:id/role', authenticateToken, requireAdmin, (req, res)
   );
 });
 
+// Create user (admin only)
+app.post('/api/admin/users', authenticateToken, requireAdmin, async (req, res) => {
+  const { name, email, password, role, approved } = req.body;
+  
+  if (!name || !email || !password) {
+    return res.status(400).json({ error: 'Name, email, and password are required' });
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const id = uuidv4();
+    const userRole = role || 'user';
+    const isApproved = approved === false ? 0 : 1;
+    
+    db.run(
+      'INSERT INTO users (id, name, email, password, role, approved) VALUES (?, ?, ?, ?, ?, ?)',
+      [id, name, email, hashedPassword, userRole, isApproved],
+      function(err) {
+        if (err) {
+          if (err.message.includes('UNIQUE constraint failed')) {
+            return res.status(400).json({ error: 'Email already registered' });
+          }
+          return res.status(500).json({ error: err.message });
+        }
+        
+        res.json({ 
+          id, 
+          name, 
+          email, 
+          role: userRole,
+          approved: isApproved === 1,
+          message: `User ${name} created successfully` 
+        });
+      }
+    );
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Get pending expenses (admin only)
 app.get('/api/admin/expenses/pending', authenticateToken, requireAdmin, (req, res) => {
   db.all(

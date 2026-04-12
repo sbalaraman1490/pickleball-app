@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Receipt, Check, X, Shield, User } from 'lucide-react';
+import { Users, Receipt, Check, X, Shield, User, Plus } from 'lucide-react';
 import { apiFetch } from '../utils/api';
 import './Admin.css';
 
@@ -9,6 +9,14 @@ function Admin() {
   const [pendingExpenses, setPendingExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newUser, setNewUser] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role: 'user',
+    approved: true
+  });
 
   useEffect(() => {
     fetchUsers();
@@ -95,6 +103,30 @@ function Admin() {
     }
   };
 
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    
+    if (newUser.password.length < 6) {
+      setMessage('Password must be at least 6 characters');
+      return;
+    }
+
+    try {
+      await apiFetch('/api/admin/users', {
+        method: 'POST',
+        body: JSON.stringify(newUser)
+      });
+      
+      setMessage(`User ${newUser.name} created successfully`);
+      setShowCreateModal(false);
+      setNewUser({ name: '', email: '', password: '', role: 'user', approved: true });
+      fetchUsers();
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      setMessage('Error creating user: ' + error.message);
+    }
+  };
+
   const pendingUsers = users.filter(u => !u.approved);
   const approvedUsers = users.filter(u => u.approved);
 
@@ -126,6 +158,22 @@ function Admin() {
 
       {activeTab === 'users' && (
         <div className="admin-section">
+          {/* Create User Button */}
+          <div className="admin-card">
+            <div className="admin-card-header">
+              <h3 className="admin-card-title">
+                <Plus size={20} />
+                Create New User
+              </h3>
+              <button 
+                className="btn btn-primary"
+                onClick={() => setShowCreateModal(true)}
+              >
+                <Plus size={16} /> Create User
+              </button>
+            </div>
+          </div>
+
           {/* Pending Users */}
           {pendingUsers.length > 0 && (
             <div className="admin-card">
@@ -254,6 +302,90 @@ function Admin() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Create User Modal */}
+      {showCreateModal && (
+        <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3 className="modal-title">Create New User</h3>
+              <button className="modal-close" onClick={() => setShowCreateModal(false)}>
+                <X size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleCreateUser}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label className="form-label">Full Name *</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={newUser.name}
+                    onChange={e => setNewUser({...newUser, name: e.target.value})}
+                    placeholder="Enter full name"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Email *</label>
+                  <input
+                    type="email"
+                    className="form-input"
+                    value={newUser.email}
+                    onChange={e => setNewUser({...newUser, email: e.target.value})}
+                    placeholder="Enter email"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Password * (min 6 chars)</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={newUser.password}
+                    onChange={e => setNewUser({...newUser, password: e.target.value})}
+                    placeholder="Create password"
+                    required
+                    minLength={6}
+                  />
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Role</label>
+                    <select
+                      className="form-select"
+                      value={newUser.role}
+                      onChange={e => setNewUser({...newUser, role: e.target.value})}
+                    >
+                      <option value="user">User</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Status</label>
+                    <select
+                      className="form-select"
+                      value={newUser.approved}
+                      onChange={e => setNewUser({...newUser, approved: e.target.value === 'true'})}
+                    >
+                      <option value={true}>Approved</option>
+                      <option value={false}>Pending Approval</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowCreateModal(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Create User
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

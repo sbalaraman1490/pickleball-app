@@ -64,6 +64,20 @@
   color: #374151;
 }
 
+.admin-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-card-header .admin-card-title {
+  border-bottom: none;
+  padding: 0;
+}
+
 .admin-card-title.pending {
   background: #fef3c7;
   color: #92400e;
