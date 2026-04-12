@@ -1,0 +1,82 @@
+import React from 'react';
+import { Routes, Route, NavLink, Navigate } from 'react-router-dom';
+import { LayoutDashboard, Calendar, Users, Receipt, Scale, LogOut } from 'lucide-react';
+import Dashboard from './pages/Dashboard';
+import Games from './pages/Games';
+import Players from './pages/Players';
+import Expenses from './pages/Expenses';
+import Balances from './pages/Balances';
+import './App.css';
+
+function AppLayout() {
+  const handleLogout = () => {
+    localStorage.removeItem('dinkans_logged_in');
+    localStorage.removeItem('dinkans_user');
+    window.location.href = '/';
+  };
+
+  return (
+    <div className="app">
+      <nav className="sidebar">
+        <div className="sidebar-header">
+          <div className="logo">
+            <img src="/logo.jpeg" alt="Dinkans" className="logo-img" />
+          </div>
+        </div>
+        
+        <ul className="nav-menu">
+          <li>
+            <NavLink to="/app" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'} end>
+              <LayoutDashboard size={20} />
+              <span>Dashboard</span>
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/app/games" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <Calendar size={20} />
+              <span>Scheduler</span>
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/app/players" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <Users size={20} />
+              <span>Players</span>
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/app/expenses" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <Receipt size={20} />
+              <span>Expenses</span>
+            </NavLink>
+          </li>
+          <li>
+            <NavLink to="/app/balances" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <Scale size={20} />
+              <span>Balances</span>
+            </NavLink>
+          </li>
+        </ul>
+
+        <div className="sidebar-footer">
+          <button className="nav-link logout-btn" onClick={handleLogout}>
+            <LogOut size={20} />
+            <span>Logout</span>
+          </button>
+          <a href="/" className="back-to-home">← Back to Home</a>
+        </div>
+      </nav>
+
+      <main className="main-content">
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/games" element={<Games />} />
+          <Route path="/players" element={<Players />} />
+          <Route path="/expenses" element={<Expenses />} />
+          <Route path="/balances" element={<Balances />} />
+        </Routes>
+      </main>
+    </div>
+  );
+}
+
+export default AppLayout;

@@ -1,68 +1,28 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Users, Receipt, Scale } from 'lucide-react';
-import Dashboard from './pages/Dashboard';
-import Games from './pages/Games';
-import Players from './pages/Players';
-import Expenses from './pages/Expenses';
-import Balances from './pages/Balances';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import LandingPage from './pages/LandingPage';
+import Login from './pages/Login';
+import AppLayout from './AppLayout';
 import './App.css';
 
 function App() {
   return (
     <Router>
-      <div className="app">
-        <nav className="sidebar">
-          <div className="sidebar-header">
-            <div className="logo">
-              <img src="/logo.jpeg" alt="Dinkans" className="logo-img" />
-            </div>
-          </div>
-          
-          <ul className="nav-menu">
-            <li>
-              <NavLink to="/" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'} end>
-                <LayoutDashboard size={20} />
-                <span>Dashboard</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/games" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                <Calendar size={20} />
-                <span>Games</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/players" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                <Users size={20} />
-                <span>Players</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/expenses" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                <Receipt size={20} />
-                <span>Expenses</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/balances" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-                <Scale size={20} />
-                <span>Balances</span>
-              </NavLink>
-            </li>
-          </ul>
-        </nav>
-
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/games" element={<Games />} />
-            <Route path="/players" element={<Players />} />
-            <Route path="/expenses" element={<Expenses />} />
-            <Route path="/balances" element={<Balances />} />
-          </Routes>
-        </main>
-      </div>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<Login />} />
+        
+        {/* App Routes with Sidebar */}
+        <Route path="/app/*" element={<AppLayout />} />
+        
+        {/* Redirect old routes to /app */}
+        <Route path="/dashboard" element={<Navigate to="/app" replace />} />
+        <Route path="/games" element={<Navigate to="/app/games" replace />} />
+        <Route path="/players" element={<Navigate to="/app/players" replace />} />
+        <Route path="/expenses" element={<Navigate to="/app/expenses" replace />} />
+        <Route path="/balances" element={<Navigate to="/app/balances" replace />} />
+      </Routes>
     </Router>
   );
 }

@@ -1,0 +1,363 @@
+/* Landing Page Styles */
+.landing-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #4ade80 0%, #facc15 50%, #a3e635 100%);
+  color: #065f46;
+  font-family: 'Inter', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Hero Section */
+.hero-section {
+  text-align: center;
+  padding: 60px 20px 40px;
+  position: relative;
+}
+
+.hero-logo {
+  margin-bottom: 30px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.landing-logo {
+  width: 200px;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.hero-title {
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.hero-title span {
+  display: block;
+}
+
+/* Content Section */
+.content-section {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+@media (max-width: 768px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  
+  .hero-title {
+    font-size: 2rem;
+  }
+}
+
+.content-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 30px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.card-header-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.card-icon {
+  font-size: 2rem;
+}
+
+.content-card h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: #065f46;
+}
+
+.goals-list,
+.support-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.goals-list li,
+.support-list li {
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(6, 95, 70, 0.1);
+  font-size: 1rem;
+  line-height: 1.5;
+  position: relative;
+  padding-left: 24px;
+}
+
+.goals-list li::before {
+  content: '🎯';
+  position: absolute;
+  left: 0;
+}
+
+.support-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: #059669;
+  font-weight: bold;
+}
+
+.goals-list li:last-child,
+.support-list li:last-child {
+  border-bottom: none;
+}
+
+.goals-list strong,
+.support-list strong {
+  color: #047857;
+}
+
+/* Journey Section */
+.journey-section {
+  text-align: center;
+  padding: 60px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 20px 0;
+}
+
+.journey-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.rocket-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 20px;
+  animation: rocket-bounce 2s ease-in-out infinite;
+}
+
+.journey-section h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.journey-section p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Quote Section */
+.quote-section {
+  padding: 60px 40px;
+  text-align: center;
+}
+
+.quote-section blockquote {
+  font-size: 1.3rem;
+  font-style: italic;
+  font-weight: 600;
+  line-height: 1.8;
+  max-width: 900px;
+  margin: 0 auto;
+  color: #065f46;
+  position: relative;
+  padding: 0 40px;
+}
+
+.quote-section blockquote::before,
+.quote-section blockquote::after {
+  content: '"';
+  font-size: 4rem;
+  position: absolute;
+  opacity: 0.3;
+  line-height: 1;
+}
+
+.quote-section blockquote::before {
+  top: -20px;
+  left: 0;
+}
+
+.quote-section blockquote::after {
+  bottom: -40px;
+  right: 0;
+}
+
+/* CTA Section */
+.cta-section {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 40px 20px 60px;
+  flex-wrap: wrap;
+}
+
+.cta-button {
+  padding: 16px 40px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.cta-button.primary {
+  background: #065f46;
+  color: white;
+  box-shadow: 0 4px 15px rgba(6, 95, 70, 0.4);
+}
+
+.cta-button.primary:hover {
+  background: #047857;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(6, 95, 70, 0.5);
+}
+
+.cta-button.secondary {
+  background: transparent;
+  color: #065f46;
+  border: 3px solid #065f46;
+}
+
+.cta-button.secondary:hover {
+  background: #065f46;
+  color: white;
+  transform: translateY(-3px);
+}
+
+/* Footer */
+.landing-footer {
+  background: rgba(0, 0, 0, 0.1);
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: #065f46;
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.2s;
+}
+
+.footer-links a:hover {
+  opacity: 0.7;
+  text-decoration: underline;
+}
+
+.footer-copyright {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin: 0;
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes rocket-bounce {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-10px) rotate(-5deg); }
+  75% { transform: translateY(-5px) rotate(5deg); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 1s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.delay-1 {
+  animation-delay: 0.3s;
+}
+
+.animate-fade-up {
+  animation: fadeUp 1s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slide-left {
+  animation: slideLeft 1s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes slideLeft {
+  from { opacity: 0; transform: translateX(-50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-slide-right {
+  animation: slideRight 1s ease-out forwards;
+  opacity: 0;
+}
+
+@keyframes slideRight {
+  from { opacity: 0; transform: translateX(50px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-item {
+  animation: fadeIn 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-item:nth-child(1) { animation-delay: 0.1s; }
+.animate-item:nth-child(2) { animation-delay: 0.2s; }
+.animate-item:nth-child(3) { animation-delay: 0.3s; }
+.animate-item:nth-child(4) { animation-delay: 0.4s; }
+.animate-item:nth-child(5) { animation-delay: 0.5s; }
+
+.animate-bounce {
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.animate-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
