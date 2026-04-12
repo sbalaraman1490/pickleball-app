@@ -15,7 +15,7 @@ function App() {
         <nav className="sidebar">
           <div className="sidebar-header">
             <div className="logo">
-              <img src="/logo.png" alt="Dinkans" className="logo-img" />
+              <img src="/logo.jpeg" alt="Dinkans" className="logo-img" />
             </div>
           </div>
           
