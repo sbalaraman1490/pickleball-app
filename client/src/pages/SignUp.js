@@ -9,6 +9,7 @@ function SignUp() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { register } = useAuth();
@@ -30,8 +31,16 @@ function SignUp() {
     setError('');
 
     try {
-      await register(name, email, password);
-      navigate('/app');
+      const result = await register(name, email, password);
+      
+      if (result.approved) {
+        // First user (admin) is auto-approved
+        navigate('/app');
+      } else {
+        // Show pending approval message
+        setSuccess('Registration successful! Please wait for admin approval before logging in.');
+        setTimeout(() => navigate('/login'), 3000);
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -50,7 +59,9 @@ function SignUp() {
           </div>
 
           {error && <div className="login-error">{error}</div>}
+          {success && <div className="login-success">{success}</div>}
 
+          {!success && (
           <form onSubmit={handleSubmit} className="login-form">
             <div className="form-group">
               <label>Full Name</label>
@@ -101,13 +112,16 @@ function SignUp() {
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
+          )}
 
+          {!success && (
           <div className="login-footer">
             <p>
               Already have an account? <Link to="/login" className="auth-link">Sign In</Link>
             </p>
             <Link to="/" className="back-link">← Back to Home</Link>
           </div>
+          )}
         </div>
       </div>
     </div>

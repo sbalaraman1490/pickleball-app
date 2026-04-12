@@ -1,0 +1,263 @@
+import React, { useState, useEffect } from 'react';
+import { Users, Receipt, Check, X, Shield, User } from 'lucide-react';
+import { apiFetch } from '../utils/api';
+import './Admin.css';
+
+function Admin() {
+  const [activeTab, setActiveTab] = useState('users');
+  const [users, setUsers] = useState([]);
+  const [pendingExpenses, setPendingExpenses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    fetchUsers();
+    fetchPendingExpenses();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const data = await apiFetch('/api/admin/users');
+      setUsers(data);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchPendingExpenses = async () => {
+    try {
+      const data = await apiFetch('/api/admin/expenses/pending');
+      setPendingExpenses(data);
+    } catch (error) {
+      console.error('Error fetching pending expenses:', error);
+    }
+  };
+
+  const approveUser = async (userId) => {
+    try {
+      await apiFetch(`/api/admin/users/${userId}/approve`, { method: 'PUT' });
+      setMessage('User approved successfully');
+      fetchUsers();
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      setMessage('Error approving user: ' + error.message);
+    }
+  };
+
+  const deleteUser = async (userId) => {
+    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    try {
+      await apiFetch(`/api/admin/users/${userId}`, { method: 'DELETE' });
+      setMessage('User deleted successfully');
+      fetchUsers();
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      setMessage('Error deleting user: ' + error.message);
+    }
+  };
+
+  const changeRole = async (userId, newRole) => {
+    try {
+      await apiFetch(`/api/admin/users/${userId}/role`, {
+        method: 'PUT',
+        body: JSON.stringify({ role: newRole })
+      });
+      setMessage(`User role updated to ${newRole}`);
+      fetchUsers();
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      setMessage('Error changing role: ' + error.message);
+    }
+  };
+
+  const approveExpense = async (expenseId) => {
+    try {
+      await apiFetch(`/api/admin/expenses/${expenseId}/approve`, { method: 'PUT' });
+      setMessage('Expense approved successfully');
+      fetchPendingExpenses();
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      setMessage('Error approving expense: ' + error.message);
+    }
+  };
+
+  const rejectExpense = async (expenseId) => {
+    if (!window.confirm('Are you sure you want to reject this expense?')) return;
+    try {
+      await apiFetch(`/api/admin/expenses/${expenseId}/reject`, { method: 'PUT' });
+      setMessage('Expense rejected');
+      fetchPendingExpenses();
+      setTimeout(() => setMessage(''), 3000);
+    } catch (error) {
+      setMessage('Error rejecting expense: ' + error.message);
+    }
+  };
+
+  const pendingUsers = users.filter(u => !u.approved);
+  const approvedUsers = users.filter(u => u.approved);
+
+  return (
+    <div>
+      <div className="page-header">
+        <h1>Admin Dashboard</h1>
+        <p>Manage users and approve expenses</p>
+      </div>
+
+      {message && <div className="admin-message">{message}</div>}
+
+      <div className="admin-tabs">
+        <button 
+          className={`admin-tab ${activeTab === 'users' ? 'active' : ''}`}
+          onClick={() => setActiveTab('users')}
+        >
+          <Users size={18} />
+          Users ({pendingUsers.length} pending)
+        </button>
+        <button 
+          className={`admin-tab ${activeTab === 'expenses' ? 'active' : ''}`}
+          onClick={() => setActiveTab('expenses')}
+        >
+          <Receipt size={18} />
+          Expenses ({pendingExpenses.length} pending)
+        </button>
+      </div>
+
+      {activeTab === 'users' && (
+        <div className="admin-section">
+          {/* Pending Users */}
+          {pendingUsers.length > 0 && (
+            <div className="admin-card">
+              <h3 className="admin-card-title pending">
+                <User size={20} />
+                Pending Approval ({pendingUsers.length})
+              </h3>
+              <div className="admin-list">
+                {pendingUsers.map(user => (
+                  <div key={user.id} className="admin-item pending">
+                    <div className="admin-item-info">
+                      <div className="admin-item-name">{user.name}</div>
+                      <div className="admin-item-email">{user.email}</div>
+                      <div className="admin-item-date">Registered: {new Date(user.created_at).toLocaleDateString()}</div>
+                    </div>
+                    <div className="admin-item-actions">
+                      <button 
+                        className="btn btn-success btn-sm"
+                        onClick={() => approveUser(user.id)}
+                      >
+                        <Check size={16} /> Approve
+                      </button>
+                      <button 
+                        className="btn btn-danger btn-sm"
+                        onClick={() => deleteUser(user.id)}
+                      >
+                        <X size={16} /> Reject
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Approved Users */}
+          <div className="admin-card">
+            <h3 className="admin-card-title">
+              <Shield size={20} />
+              Approved Users ({approvedUsers.length})
+            </h3>
+            <div className="admin-list">
+              {approvedUsers.map(user => (
+                <div key={user.id} className="admin-item">
+                  <div className="admin-item-info">
+                    <div className="admin-item-name">
+                      {user.name}
+                      {user.role === 'admin' && <span className="admin-badge">Admin</span>}
+                    </div>
+                    <div className="admin-item-email">{user.email}</div>
+                  </div>
+                  <div className="admin-item-actions">
+                    <select 
+                      className="role-select"
+                      value={user.role}
+                      onChange={(e) => changeRole(user.id, e.target.value)}
+                    >
+                      <option value="user">User</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                    <button 
+                      className="btn btn-danger btn-sm"
+                      onClick={() => deleteUser(user.id)}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'expenses' && (
+        <div className="admin-section">
+          {pendingExpenses.length === 0 ? (
+            <div className="empty-state">
+              <div className="empty-state-icon">✓</div>
+              <div className="empty-state-title">No pending expenses</div>
+              <p>All expenses have been reviewed</p>
+            </div>
+          ) : (
+            <div className="admin-card">
+              <h3 className="admin-card-title pending">
+                <Receipt size={20} />
+                Pending Expenses ({pendingExpenses.length})
+              </h3>
+              <div className="admin-list">
+                {pendingExpenses.map(expense => (
+                  <div key={expense.id} className="admin-item expense-item">
+                    <div className="admin-item-info">
+                      <div className="admin-item-name">
+                        {expense.category}: ${expense.amount?.toFixed(2)}
+                      </div>
+                      <div className="admin-item-details">
+                        {expense.description}
+                        {expense.game_location && ` • ${expense.game_location}`}
+                      </div>
+                      <div className="admin-item-meta">
+                        Created by: {expense.creator_name || 'Unknown'} • 
+                        Date: {new Date(expense.date).toLocaleDateString()}
+                      </div>
+                      {expense.splits?.length > 0 && (
+                        <div className="expense-splits">
+                          Split among: {expense.splits.map(s => `${s.player_name} ($${s.amount?.toFixed(2)})`).join(', ')}
+                        </div>
+                      )}
+                    </div>
+                    <div className="admin-item-actions">
+                      <button 
+                        className="btn btn-success btn-sm"
+                        onClick={() => approveExpense(expense.id)}
+                      >
+                        <Check size={16} /> Approve
+                      </button>
+                      <button 
+                        className="btn btn-danger btn-sm"
+                        onClick={() => rejectExpense(expense.id)}
+                      >
+                        <X size={16} /> Reject
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Admin;

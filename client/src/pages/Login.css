@@ -56,13 +56,23 @@
 }
 
 .login-error {
-  background: #fef2f2;
+  background: #fee2e2;
   color: #dc2626;
   padding: 12px;
   border-radius: 8px;
   margin-bottom: 20px;
   font-size: 0.9rem;
   border: 1px solid #fecaca;
+}
+
+.login-success {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  border: 1px solid #a7f3d0;
 }
 
 .login-form {

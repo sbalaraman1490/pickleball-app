@@ -1,17 +1,20 @@
 import React from 'react';
 import { Routes, Route, NavLink, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Users, Receipt, Scale, LogOut } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Receipt, Scale, LogOut, Shield } from 'lucide-react';
+import { useAuth } from './context/AuthContext';
 import Dashboard from './pages/Dashboard';
 import Games from './pages/Games';
 import Players from './pages/Players';
 import Expenses from './pages/Expenses';
 import Balances from './pages/Balances';
+import Admin from './pages/Admin';
 import './App.css';
 
 function AppLayout() {
+  const { logout, isAdmin } = useAuth();
+  
   const handleLogout = () => {
-    localStorage.removeItem('dinkans_logged_in');
-    localStorage.removeItem('dinkans_user');
+    logout();
     window.location.href = '/';
   };
 
@@ -55,6 +58,14 @@ function AppLayout() {
               <span>Balances</span>
             </NavLink>
           </li>
+          {isAdmin() && (
+            <li>
+              <NavLink to="/app/admin" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                <Shield size={20} />
+                <span>Admin</span>
+              </NavLink>
+            </li>
+          )}
         </ul>
 
         <div className="sidebar-footer">
@@ -73,6 +84,7 @@ function AppLayout() {
           <Route path="/players" element={<Players />} />
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/balances" element={<Balances />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       </main>
     </div>

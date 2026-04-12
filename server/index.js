@@ -66,9 +66,15 @@ db.serialize(() => {
     game_id TEXT,
     payer_id TEXT,
     split_among_all BOOLEAN DEFAULT 0,
+    status TEXT DEFAULT 'pending',
+    created_by TEXT,
+    approved_by TEXT,
+    approved_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (game_id) REFERENCES games(id),
-    FOREIGN KEY (payer_id) REFERENCES players(id)
+    FOREIGN KEY (payer_id) REFERENCES players(id),
+    FOREIGN KEY (created_by) REFERENCES users(id),
+    FOREIGN KEY (approved_by) REFERENCES users(id)
   )`);
 
   // Expense splits table
@@ -88,6 +94,8 @@ db.serialize(() => {
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
+    role TEXT DEFAULT 'user',
+    approved BOOLEAN DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 });
@@ -103,11 +111,27 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ error: 'Access denied. No token provided.' });
   }
 
-  jwt.verify(token, JWT_SECRET, (err, user) => {
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) return res.status(403).json({ error: 'Invalid token' });
-    req.user = user;
-    next();
+    
+    // Fetch full user details including role
+    db.get('SELECT id, name, email, role, approved FROM users WHERE id = ?', [decoded.id], (err, user) => {
+      if (err) return res.status(500).json({ error: err.message });
+      if (!user) return res.status(403).json({ error: 'User not found' });
+      if (!user.approved) return res.status(403).json({ error: 'Account pending approval. Please wait for admin approval.' });
+      
+      req.user = user;
+      next();
+    });
   });
+};
+
+// Admin middleware
+const requireAdmin = (req, res, next) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+  next();
 };
 
 // Register
@@ -126,21 +150,38 @@ app.post('/api/auth/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const id = uuidv4();
     
-    db.run(
-      'INSERT INTO users (id, name, email, password) VALUES (?, ?, ?, ?)',
-      [id, name, email, hashedPassword],
-      function(err) {
-        if (err) {
-          if (err.message.includes('UNIQUE constraint failed')) {
-            return res.status(400).json({ error: 'Email already registered' });
+    // Check if this is the first user - make them admin and auto-approve
+    db.get('SELECT COUNT(*) as count FROM users', [], (err, row) => {
+      const isFirstUser = row.count === 0;
+      const role = isFirstUser ? 'admin' : 'user';
+      const approved = isFirstUser ? 1 : 0;
+      
+      db.run(
+        'INSERT INTO users (id, name, email, password, role, approved) VALUES (?, ?, ?, ?, ?, ?)',
+        [id, name, email, hashedPassword, role, approved],
+        function(err) {
+          if (err) {
+            if (err.message.includes('UNIQUE constraint failed')) {
+              return res.status(400).json({ error: 'Email already registered' });
+            }
+            return res.status(500).json({ error: err.message });
           }
-          return res.status(500).json({ error: err.message });
+          
+          const message = isFirstUser 
+            ? 'Registration successful. You are the admin user.'
+            : 'Registration successful. Please wait for admin approval before logging in.';
+          
+          res.json({ 
+            id, 
+            name, 
+            email, 
+            role,
+            approved: approved === 1,
+            message 
+          });
         }
-        
-        const token = jwt.sign({ id, email, name }, JWT_SECRET, { expiresIn: '7d' });
-        res.json({ id, name, email, token });
-      }
-    );
+      );
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -164,8 +205,12 @@ app.post('/api/auth/login', (req, res) => {
         return res.status(400).json({ error: 'Invalid email or password' });
       }
 
-      const token = jwt.sign({ id: user.id, email: user.email, name: user.name }, JWT_SECRET, { expiresIn: '7d' });
-      res.json({ id: user.id, name: user.name, email: user.email, token });
+      if (!user.approved) {
+        return res.status(403).json({ error: 'Account pending approval. Please wait for admin approval or contact an administrator.' });
+      }
+
+      const token = jwt.sign({ id: user.id, email: user.email, name: user.name, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+      res.json({ id: user.id, name: user.name, email: user.email, role: user.role, token });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
@@ -174,7 +219,129 @@ app.post('/api/auth/login', (req, res) => {
 
 // Get current user
 app.get('/api/auth/me', authenticateToken, (req, res) => {
-  res.json({ id: req.user.id, email: req.user.email, name: req.user.name });
+  res.json({ id: req.user.id, email: req.user.email, name: req.user.name, role: req.user.role });
+});
+
+// ========== ADMIN API ==========
+
+// Get all users (admin only)
+app.get('/api/admin/users', authenticateToken, requireAdmin, (req, res) => {
+  db.all('SELECT id, name, email, role, approved, created_at FROM users ORDER BY created_at DESC', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows);
+  });
+});
+
+// Approve user (admin only)
+app.put('/api/admin/users/:id/approve', authenticateToken, requireAdmin, (req, res) => {
+  db.run(
+    'UPDATE users SET approved = 1 WHERE id = ?',
+    [req.params.id],
+    function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: 'User approved successfully' });
+    }
+  );
+});
+
+// Reject/Delete user (admin only)
+app.delete('/api/admin/users/:id', authenticateToken, requireAdmin, (req, res) => {
+  // Prevent admin from deleting themselves
+  if (req.params.id === req.user.id) {
+    return res.status(400).json({ error: 'Cannot delete your own account' });
+  }
+  
+  db.run('DELETE FROM users WHERE id = ?', [req.params.id], function(err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ message: 'User deleted successfully' });
+  });
+});
+
+// Change user role (admin only)
+app.put('/api/admin/users/:id/role', authenticateToken, requireAdmin, (req, res) => {
+  const { role } = req.body;
+  if (!['admin', 'user'].includes(role)) {
+    return res.status(400).json({ error: 'Invalid role' });
+  }
+  
+  // Prevent admin from demoting themselves
+  if (req.params.id === req.user.id && role === 'user') {
+    return res.status(400).json({ error: 'Cannot demote yourself from admin' });
+  }
+  
+  db.run(
+    'UPDATE users SET role = ? WHERE id = ?',
+    [role, req.params.id],
+    function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: 'User role updated successfully' });
+    }
+  );
+});
+
+// Get pending expenses (admin only)
+app.get('/api/admin/expenses/pending', authenticateToken, requireAdmin, (req, res) => {
+  db.all(
+    `SELECT e.*, g.location as game_location, p.name as payer_name, u.name as creator_name 
+     FROM expenses e 
+     LEFT JOIN games g ON e.game_id = g.id 
+     LEFT JOIN players p ON e.payer_id = p.id 
+     LEFT JOIN users u ON e.created_by = u.id
+     WHERE e.status = 'pending'
+     ORDER BY e.created_at DESC`,
+    [],
+    (err, expenses) => {
+      if (err) return res.status(500).json({ error: err.message });
+      
+      if (expenses.length === 0) return res.json([]);
+      
+      // Get splits for each expense
+      const expenseIds = expenses.map(e => e.id);
+      const placeholders = expenseIds.map(() => '?').join(',');
+      
+      db.all(
+        `SELECT es.*, pl.name as player_name 
+         FROM expense_splits es 
+         JOIN players pl ON es.player_id = pl.id 
+         WHERE es.expense_id IN (${placeholders})`,
+        expenseIds,
+        (err, splits) => {
+          if (err) return res.status(500).json({ error: err.message });
+          
+          const expensesWithSplits = expenses.map(exp => ({
+            ...exp,
+            splits: splits.filter(s => s.expense_id === exp.id) || []
+          }));
+          
+          res.json(expensesWithSplits);
+        }
+      );
+    }
+  );
+});
+
+// Approve expense (admin only)
+app.put('/api/admin/expenses/:id/approve', authenticateToken, requireAdmin, (req, res) => {
+  db.run(
+    'UPDATE expenses SET status = ?, approved_by = ?, approved_at = datetime("now") WHERE id = ?',
+    ['approved', req.user.id, req.params.id],
+    function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: 'Expense approved successfully' });
+    }
+  );
+});
+
+// Reject expense (admin only)
+app.put('/api/admin/expenses/:id/reject', authenticateToken, requireAdmin, (req, res) => {
+  db.run(
+    'UPDATE expenses SET status = ? WHERE id = ?',
+    ['rejected', req.params.id],
+    function(err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ message: 'Expense rejected' });
+    }
+  );
 });
 
 // ========== PLAYERS API ==========
@@ -375,10 +542,13 @@ app.post('/api/games/:id/record-payment', authenticateToken, (req, res) => {
       const expenseDate = date || game.date;
       const splitAmount = amount / playerIds.length;
       
+      // Auto-approve if created by admin, otherwise pending
+      const status = req.user.role === 'admin' ? 'approved' : 'pending';
+      
       db.run(
-        `INSERT INTO expenses (id, date, category, description, amount, game_id, payer_id, split_among_all) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [expenseId, expenseDate, 'Court Fee', `Court fee for ${game.location} on ${game.date}`, amount, gameId, payer_id, 1],
+        `INSERT INTO expenses (id, date, category, description, amount, game_id, payer_id, split_among_all, status, created_by${status === 'approved' ? ', approved_by, approved_at' : ''}) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?${status === 'approved' ? ', ?, datetime("now")' : ''})`,
+        [expenseId, expenseDate, 'Court Fee', `Court fee for ${game.location} on ${game.date}`, amount, gameId, payer_id, 1, status, req.user.id].concat(status === 'approved' ? [req.user.id] : []),
         function(err) {
           if (err) return res.status(500).json({ error: err.message });
           
@@ -456,9 +626,13 @@ app.post('/api/expenses', authenticateToken, (req, res) => {
   const { date, category, description, amount, game_id, payer_id, split_among_all, splits } = req.body;
   const id = uuidv4();
   
+  // Auto-approve if created by admin, otherwise pending
+  const status = req.user.role === 'admin' ? 'approved' : 'pending';
+  
   db.run(
-    'INSERT INTO expenses (id, date, category, description, amount, game_id, payer_id, split_among_all) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    [id, date, category, description, amount, game_id, payer_id, split_among_all ? 1 : 0],
+    `INSERT INTO expenses (id, date, category, description, amount, game_id, payer_id, split_among_all, status, created_by${status === 'approved' ? ', approved_by, approved_at' : ''}) 
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?${status === 'approved' ? ', ?, datetime("now")' : ''})`,
+    [id, date, category, description, amount, game_id, payer_id, split_among_all ? 1 : 0, status, req.user.id].concat(status === 'approved' ? [req.user.id] : []),
     function(err) {
       if (err) return res.status(500).json({ error: err.message });
       
@@ -471,7 +645,7 @@ app.post('/api/expenses', authenticateToken, (req, res) => {
         stmt.finalize();
       }
       
-      res.json({ id, date, category, description, amount, game_id, payer_id, split_among_all });
+      res.json({ id, date, category, description, amount, game_id, payer_id, split_among_all, status, message: status === 'pending' ? 'Expense created and pending admin approval' : 'Expense created and approved' });
     }
   );
 });
