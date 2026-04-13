@@ -152,7 +152,6 @@
 .app {
   display: flex;
   min-height: 100vh;
-  padding-top: 70px; /* Space for fixed header */
   background: var(--gray-50);
 }
 
@@ -409,8 +408,9 @@
 .main-content {
   flex: 1;
   margin-left: 280px;
-  padding: 28px 36px 36px;
   min-height: calc(100vh - 70px);
+  padding: 24px;
+  background: var(--gray-50);
 }
 
 .page-header {

@@ -123,20 +123,18 @@ function AppLayout() {
       </nav>
 
       <main className="main-content">
-        <div className="page-content animate-fade-in">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/games" element={<Games />} />
-            <Route path="/players" element={<Players />} />
-            <Route path="/expenses" element={<Expenses />} />
-            <Route path="/balances" element={<Balances />} />
-            <Route path="/rules" element={<Rules />} />
-            <Route path="/feed" element={<Feed />} />
-            <Route path="/paddles" element={<PaddleCompare />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/admin" element={<Admin />} />
-          </Routes>
-        </div>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/games" element={<Games />} />
+          <Route path="/players" element={<Players />} />
+          <Route path="/expenses" element={<Expenses />} />
+          <Route path="/balances" element={<Balances />} />
+          <Route path="/rules" element={<Rules />} />
+          <Route path="/feed" element={<Feed />} />
+          <Route path="/paddles" element={<PaddleCompare />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/admin" element={<Admin />} />
+        </Routes>
       </main>
     </div>
   );
