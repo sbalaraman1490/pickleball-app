@@ -176,7 +176,7 @@ function LandingPage() {
             <div className="video-card">
               <div className="video-wrapper">
                 <iframe
-                  src="https://www.youtube.com/embed/rN7hfY0qSgI"
+                  src="https://www.youtube.com/embed/pXzxTASxIaQ"
                   title="Pickleball Dink Drill"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -189,7 +189,7 @@ function LandingPage() {
             <div className="video-card">
               <div className="video-wrapper">
                 <iframe
-                  src="https://www.youtube.com/embed/9hnJsN5sy8A"
+                  src="https://www.youtube.com/embed/kj3Z0m1PqTk"
                   title="Pickleball Third Shot Drop"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -202,7 +202,7 @@ function LandingPage() {
             <div className="video-card">
               <div className="video-wrapper">
                 <iframe
-                  src="https://www.youtube.com/embed/5qTGi_6S6zA"
+                  src="https://www.youtube.com/embed/0EO6C1BhXgU"
                   title="Pickleball Volley Drills"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -215,7 +215,7 @@ function LandingPage() {
             <div className="video-card">
               <div className="video-wrapper">
                 <iframe
-                  src="https://www.youtube.com/embed/3Vv3DwQq4Kk"
+                  src="https://www.youtube.com/embed/0nwljP87CJ0"
                   title="Pickleball Footwork"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -228,7 +228,7 @@ function LandingPage() {
             <div className="video-card">
               <div className="video-wrapper">
                 <iframe
-                  src="https://www.youtube.com/embed/8Y_8H2n1LwM"
+                  src="https://www.youtube.com/embed/9gnl9FVK4c8"
                   title="Pickleball Serve Practice"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -241,7 +241,7 @@ function LandingPage() {
             <div className="video-card">
               <div className="video-wrapper">
                 <iframe
-                  src="https://www.youtube.com/embed/1V7m4H-2h6I"
+                  src="https://www.youtube.com/embed/hWjH1C5gKos"
                   title="Pickleball Lob Defense"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
