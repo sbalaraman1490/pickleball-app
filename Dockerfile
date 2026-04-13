@@ -21,4 +21,5 @@ RUN mkdir -p server/data
 
 EXPOSE 3001
 
+# Force rebuild: v1
 CMD ["node", "server/index.js"]
