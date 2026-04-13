@@ -1,27 +1,27 @@
 /* Design System Variables */
 :root {
-  /* Colors */
-  --primary: #065f46;
-  --primary-light: #059669;
-  --primary-dark: #064e3b;
-  --secondary: #1e293b;
-  --accent: #f59e0b;
-  --success: #10b981;
+  /* Colors - Light Blue Theme */
+  --primary: #3b82f6;
+  --primary-light: #60a5fa;
+  --primary-dark: #1d4ed8;
+  --secondary: #1e3a5f;
+  --accent: #93c5fd;
+  --success: #22c55e;
   --warning: #f59e0b;
   --danger: #ef4444;
-  --info: #3b82f6;
+  --info: #60a5fa;
   
   /* Neutrals */
   --white: #ffffff;
-  --gray-50: #f8fafc;
-  --gray-100: #f1f5f9;
-  --gray-200: #e2e8f0;
-  --gray-300: #cbd5e1;
-  --gray-400: #94a3b8;
-  --gray-500: #64748b;
-  --gray-600: #475569;
-  --gray-700: #334155;
-  --gray-800: #1e293b;
+  --gray-50: #eff6ff;
+  --gray-100: #dbeafe;
+  --gray-200: #bfdbfe;
+  --gray-300: #93c5fd;
+  --gray-400: #60a5fa;
+  --gray-500: #3b82f6;
+  --gray-600: #2563eb;
+  --gray-700: #1d4ed8;
+  --gray-800: #1e3a5f;
   --gray-900: #0f172a;
   
   /* Shadows */
@@ -118,8 +118,8 @@
 }
 
 @keyframes glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(6, 95, 70, 0.5); }
-  50% { box-shadow: 0 0 20px rgba(6, 95, 70, 0.8), 0 0 40px rgba(6, 95, 70, 0.4); }
+  0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+  50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 40px rgba(59, 130, 246, 0.4); }
 }
 
 @keyframes ripple {

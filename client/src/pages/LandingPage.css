@@ -456,18 +456,18 @@
   align-items: center;
   gap: 6px;
   font-weight: 600;
-  color: #065f46;
+  color: #2563eb;
   font-size: 0.95rem;
 }
 
 .feature-card:hover .feature-link {
-  color: #047857;
+  color: #1d4ed8;
 }
 
 /* Pickleball Drills Section */
 .drills-section {
   padding: 60px 24px;
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
 }
 
 .drills-section .container {
@@ -483,7 +483,7 @@
 .drills-section .section-icon {
   width: 48px;
   height: 48px;
-  color: #065f46;
+  color: #2563eb;
   margin-bottom: 16px;
 }
 
@@ -510,20 +510,20 @@
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   color: white;
   padding: 16px 32px;
   border-radius: 50px;
   font-size: 1.1rem;
   font-weight: 600;
   text-decoration: none;
-  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .drills-button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
 }
 
 .drills-note {
@@ -560,7 +560,7 @@
 
 .video-thumbnail {
   position: relative;
-  background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   aspect-ratio: 16 / 9;
   display: flex;
   align-items: center;
@@ -592,7 +592,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #065f46;
+  color: #2563eb;
   transition: transform 0.3s ease, background 0.3s ease;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
