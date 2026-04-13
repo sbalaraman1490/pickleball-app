@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { BookOpen, MessageSquare, ShoppingBag, ArrowRight } from 'lucide-react';
+import { BookOpen, MessageSquare, ShoppingBag, ArrowRight, Play } from 'lucide-react';
 import './LandingPage.css';
 
 function LandingPage() {
@@ -164,7 +164,98 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* CTA Buttons */}
+      {/* Pickleball Drills Section */}
+      <section className="drills-section">
+        <div className="container">
+          <div className="section-header">
+            <Play className="section-icon" />
+            <h2>Pickleball Drills</h2>
+            <p>Improve your game with these professional drills and tutorials</p>
+          </div>
+          <div className="videos-grid">
+            <div className="video-card">
+              <div className="video-wrapper">
+                <iframe
+                  src="https://www.youtube.com/embed/rN7hfY0qSgI"
+                  title="Pickleball Dink Drill"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
+              <h3>The Dink Game</h3>
+              <p>Master the soft game with this essential dinking drill</p>
+            </div>
+            <div className="video-card">
+              <div className="video-wrapper">
+                <iframe
+                  src="https://www.youtube.com/embed/9hnJsN5sy8A"
+                  title="Pickleball Third Shot Drop"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
+              <h3>Third Shot Drop</h3>
+              <p>Perfect your transition from serve to the net</p>
+            </div>
+            <div className="video-card">
+              <div className="video-wrapper">
+                <iframe
+                  src="https://www.youtube.com/embed/5qTGi_6S6zA"
+                  title="Pickleball Volley Drills"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
+              <h3>Volley at the Net</h3>
+              <p>Fast-paced volley exchanges to sharpen your reflexes</p>
+            </div>
+            <div className="video-card">
+              <div className="video-wrapper">
+                <iframe
+                  src="https://www.youtube.com/embed/3Vv3DwQq4Kk"
+                  title="Pickleball Footwork"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
+              <h3>Footwork Fundamentals</h3>
+              <p>Quick and agile movement patterns for all court positions</p>
+            </div>
+            <div className="video-card">
+              <div className="video-wrapper">
+                <iframe
+                  src="https://www.youtube.com/embed/8Y_8H2n1LwM"
+                  title="Pickleball Serve Practice"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
+              <h3>Power Serve Drill</h3>
+              <p>Develop a consistent and powerful serve technique</p>
+            </div>
+            <div className="video-card">
+              <div className="video-wrapper">
+                <iframe
+                  src="https://www.youtube.com/embed/1V7m4H-2h6I"
+                  title="Pickleball Lob Defense"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
+              <h3>Lob Defense</h3>
+              <p>How to handle high lobs and maintain court position</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
       <section className="cta-section">
         <button className="cta-button primary animate-bounce" onClick={() => navigate('/login')}>
           Member Login
