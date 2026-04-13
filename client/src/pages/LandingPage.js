@@ -173,84 +173,66 @@ function LandingPage() {
             <p>Improve your game with these professional drills and tutorials</p>
           </div>
           <div className="videos-grid">
-            <div className="video-card">
-              <div className="video-wrapper">
-                <iframe
-                  src="https://www.youtube.com/embed/pXzxTASxIaQ"
-                  title="Pickleball Dink Drill"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
+            <a href="https://www.youtube.com/watch?v=pXzxTASxIaQ" target="_blank" rel="noopener noreferrer" className="video-card">
+              <div className="video-thumbnail">
+                <div className="play-button">
+                  <Play size={32} />
+                </div>
+                <span className="video-duration">8:24</span>
               </div>
               <h3>The Dink Game</h3>
               <p>Master the soft game with this essential dinking drill</p>
-            </div>
-            <div className="video-card">
-              <div className="video-wrapper">
-                <iframe
-                  src="https://www.youtube.com/embed/kj3Z0m1PqTk"
-                  title="Pickleball Third Shot Drop"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
+            </a>
+            <a href="https://www.youtube.com/watch?v=kj3Z0m1PqTk" target="_blank" rel="noopener noreferrer" className="video-card">
+              <div className="video-thumbnail">
+                <div className="play-button">
+                  <Play size={32} />
+                </div>
+                <span className="video-duration">12:15</span>
               </div>
               <h3>Third Shot Drop</h3>
               <p>Perfect your transition from serve to the net</p>
-            </div>
-            <div className="video-card">
-              <div className="video-wrapper">
-                <iframe
-                  src="https://www.youtube.com/embed/0EO6C1BhXgU"
-                  title="Pickleball Volley Drills"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
+            </a>
+            <a href="https://www.youtube.com/watch?v=0EO6C1BhXgU" target="_blank" rel="noopener noreferrer" className="video-card">
+              <div className="video-thumbnail">
+                <div className="play-button">
+                  <Play size={32} />
+                </div>
+                <span className="video-duration">6:42</span>
               </div>
               <h3>Volley at the Net</h3>
               <p>Fast-paced volley exchanges to sharpen your reflexes</p>
-            </div>
-            <div className="video-card">
-              <div className="video-wrapper">
-                <iframe
-                  src="https://www.youtube.com/embed/0nwljP87CJ0"
-                  title="Pickleball Footwork"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
+            </a>
+            <a href="https://www.youtube.com/watch?v=0nwljP87CJ0" target="_blank" rel="noopener noreferrer" className="video-card">
+              <div className="video-thumbnail">
+                <div className="play-button">
+                  <Play size={32} />
+                </div>
+                <span className="video-duration">9:30</span>
               </div>
               <h3>Footwork Fundamentals</h3>
               <p>Quick and agile movement patterns for all court positions</p>
-            </div>
-            <div className="video-card">
-              <div className="video-wrapper">
-                <iframe
-                  src="https://www.youtube.com/embed/9gnl9FVK4c8"
-                  title="Pickleball Serve Practice"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
+            </a>
+            <a href="https://www.youtube.com/watch?v=9gnl9FVK4c8" target="_blank" rel="noopener noreferrer" className="video-card">
+              <div className="video-thumbnail">
+                <div className="play-button">
+                  <Play size={32} />
+                </div>
+                <span className="video-duration">7:18</span>
               </div>
               <h3>Power Serve Drill</h3>
               <p>Develop a consistent and powerful serve technique</p>
-            </div>
-            <div className="video-card">
-              <div className="video-wrapper">
-                <iframe
-                  src="https://www.youtube.com/embed/hWjH1C5gKos"
-                  title="Pickleball Lob Defense"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                ></iframe>
+            </a>
+            <a href="https://www.youtube.com/watch?v=hWjH1C5gKos" target="_blank" rel="noopener noreferrer" className="video-card">
+              <div className="video-thumbnail">
+                <div className="play-button">
+                  <Play size={32} />
+                </div>
+                <span className="video-duration">10:05</span>
               </div>
               <h3>Lob Defense</h3>
               <p>How to handle high lobs and maintain court position</p>
-            </div>
+            </a>
           </div>
         </div>
       </section>
