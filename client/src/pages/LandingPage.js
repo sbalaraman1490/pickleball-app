@@ -173,7 +173,7 @@ function LandingPage() {
             <p>Improve your game with these professional drills and tutorials</p>
           </div>
           <div className="videos-grid">
-            <a href="https://www.youtube.com/watch?v=pXzxTASxIaQ" target="_blank" rel="noopener noreferrer" className="video-card">
+            <a href="https://www.youtube.com/watch?v=F3zM_o372Ww" target="_blank" rel="noopener noreferrer" className="video-card">
               <div className="video-thumbnail">
                 <div className="play-button">
                   <Play size={32} />
@@ -183,7 +183,7 @@ function LandingPage() {
               <h3>The Dink Game</h3>
               <p>Master the soft game with this essential dinking drill</p>
             </a>
-            <a href="https://www.youtube.com/watch?v=kj3Z0m1PqTk" target="_blank" rel="noopener noreferrer" className="video-card">
+            <a href="https://www.youtube.com/watch?v=3Vv3DwQq4Kk" target="_blank" rel="noopener noreferrer" className="video-card">
               <div className="video-thumbnail">
                 <div className="play-button">
                   <Play size={32} />
@@ -193,7 +193,7 @@ function LandingPage() {
               <h3>Third Shot Drop</h3>
               <p>Perfect your transition from serve to the net</p>
             </a>
-            <a href="https://www.youtube.com/watch?v=0EO6C1BhXgU" target="_blank" rel="noopener noreferrer" className="video-card">
+            <a href="https://www.youtube.com/watch?v=8Y_8H2n1LwM" target="_blank" rel="noopener noreferrer" className="video-card">
               <div className="video-thumbnail">
                 <div className="play-button">
                   <Play size={32} />
@@ -203,7 +203,7 @@ function LandingPage() {
               <h3>Volley at the Net</h3>
               <p>Fast-paced volley exchanges to sharpen your reflexes</p>
             </a>
-            <a href="https://www.youtube.com/watch?v=0nwljP87CJ0" target="_blank" rel="noopener noreferrer" className="video-card">
+            <a href="https://www.youtube.com/watch?v=5qTGi_6S6zA" target="_blank" rel="noopener noreferrer" className="video-card">
               <div className="video-thumbnail">
                 <div className="play-button">
                   <Play size={32} />
@@ -213,7 +213,7 @@ function LandingPage() {
               <h3>Footwork Fundamentals</h3>
               <p>Quick and agile movement patterns for all court positions</p>
             </a>
-            <a href="https://www.youtube.com/watch?v=9gnl9FVK4c8" target="_blank" rel="noopener noreferrer" className="video-card">
+            <a href="https://www.youtube.com/watch?v=9hnJsN5sy8A" target="_blank" rel="noopener noreferrer" className="video-card">
               <div className="video-thumbnail">
                 <div className="play-button">
                   <Play size={32} />
@@ -223,7 +223,7 @@ function LandingPage() {
               <h3>Power Serve Drill</h3>
               <p>Develop a consistent and powerful serve technique</p>
             </a>
-            <a href="https://www.youtube.com/watch?v=hWjH1C5gKos" target="_blank" rel="noopener noreferrer" className="video-card">
+            <a href="https://www.youtube.com/watch?v=1V7m4H-2h6I" target="_blank" rel="noopener noreferrer" className="video-card">
               <div className="video-thumbnail">
                 <div className="play-button">
                   <Play size={32} />
