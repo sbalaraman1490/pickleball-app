@@ -26,14 +26,14 @@
 }
 
 .admin-tab.active {
-  background: #065f46;
+  background: #2563eb;
   color: white;
 }
 
 .admin-message {
   background: #d1fae5;
-  border: 1px solid #059669;
-  color: #065f46;
+  border: 1px solid #2563eb;
+  color: #2563eb;
   padding: 12px 16px;
   border-radius: 8px;
   margin-bottom: 20px;
@@ -147,7 +147,7 @@
 }
 
 .admin-badge {
-  background: #065f46;
+  background: #2563eb;
   color: white;
   padding: 2px 8px;
   border-radius: 4px;
@@ -186,12 +186,12 @@
 }
 
 .btn-success {
-  background: #059669;
+  background: #2563eb;
   color: white;
 }
 
 .btn-success:hover {
-  background: #047857;
+  background: #1d4ed8;
 }
 
 .empty-state {

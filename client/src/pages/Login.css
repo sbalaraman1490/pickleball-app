@@ -1,7 +1,7 @@
 /* Modern Auth Pages */
 .auth-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #065f46 0%, #047857 50%, #059669 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #2563eb 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -51,7 +51,7 @@
 }
 
 .auth-header h1 {
-  color: #065f46;
+  color: #2563eb;
   font-size: 1.9rem;
   margin: 0 0 10px 0;
   font-weight: 700;
@@ -78,7 +78,7 @@
 
 .login-success {
   background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-  color: #065f46;
+  color: #2563eb;
   padding: 14px 16px;
   border-radius: 12px;
   margin-bottom: 24px;
@@ -121,7 +121,7 @@
 
 .form-input:focus {
   outline: none;
-  border-color: #059669;
+  border-color: #2563eb;
   background: white;
   box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);
 }
@@ -160,7 +160,7 @@
 }
 
 .forgot-password-link a {
-  color: #065f46;
+  color: #2563eb;
   font-size: 0.9rem;
   text-decoration: none;
   font-weight: 500;
@@ -168,7 +168,7 @@
 }
 
 .forgot-password-link a:hover {
-  color: #047857;
+  color: #1d4ed8;
   text-decoration: underline;
 }
 
@@ -205,7 +205,7 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   color: white;
   box-shadow: 0 4px 14px rgba(6, 95, 70, 0.35);
 }
@@ -256,11 +256,11 @@
 }
 
 .back-link:hover {
-  color: #065f46;
+  color: #2563eb;
 }
 
 .auth-link {
-  color: #065f46;
+  color: #2563eb;
   text-decoration: none;
   font-weight: 600;
   transition: all 0.2s;
@@ -268,6 +268,6 @@
 
 .auth-link:hover {
   text-decoration: underline;
-  color: #047857;
+  color: #1d4ed8;
 }
 

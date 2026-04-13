@@ -2,7 +2,7 @@
 .landing-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #4ade80 0%, #facc15 50%, #a3e635 100%);
-  color: #065f46;
+  color: #2563eb;
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
 }
@@ -85,7 +85,7 @@
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0;
-  color: #065f46;
+  color: #2563eb;
 }
 
 .goals-list,
@@ -115,7 +115,7 @@
   content: '✓';
   position: absolute;
   left: 0;
-  color: #059669;
+  color: #2563eb;
   font-weight: bold;
 }
 
@@ -126,7 +126,7 @@
 
 .goals-list strong,
 .support-list strong {
-  color: #047857;
+  color: #1d4ed8;
 }
 
 /* Journey Section */
@@ -175,7 +175,7 @@
   line-height: 1.8;
   max-width: 900px;
   margin: 0 auto;
-  color: #065f46;
+  color: #2563eb;
   position: relative;
   padding: 0 40px;
 }
@@ -209,7 +209,7 @@
 .instagram-section h2 {
   font-size: 2rem;
   font-weight: 700;
-  color: #065f46;
+  color: #2563eb;
   margin-bottom: 30px;
 }
 
@@ -240,25 +240,25 @@
 }
 
 .cta-button.primary {
-  background: #065f46;
+  background: #2563eb;
   color: white;
   box-shadow: 0 4px 15px rgba(6, 95, 70, 0.4);
 }
 
 .cta-button.primary:hover {
-  background: #047857;
+  background: #1d4ed8;
   transform: translateY(-3px);
   box-shadow: 0 6px 20px rgba(6, 95, 70, 0.5);
 }
 
 .cta-button.secondary {
   background: transparent;
-  color: #065f46;
-  border: 3px solid #065f46;
+  color: #2563eb;
+  border: 3px solid #2563eb;
 }
 
 .cta-button.secondary:hover {
-  background: #065f46;
+  background: #2563eb;
   color: white;
   transform: translateY(-3px);
 }
@@ -279,7 +279,7 @@
 }
 
 .footer-links a {
-  color: #065f46;
+  color: #2563eb;
   text-decoration: none;
   font-weight: 500;
   transition: opacity 0.2s;

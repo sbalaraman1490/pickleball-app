@@ -154,7 +154,7 @@ function Feed() {
   const getPostBadge = (type) => {
     const badges = {
       announcement: { text: 'Announcement', color: '#8b5cf6' },
-      game_result: { text: 'Game Result', color: '#10b981' },
+      game_result: { text: 'Game Result', color: '#3b82f6' },
       tip: { text: 'Pro Tip', color: '#f59e0b' },
       news: { text: 'News', color: '#3b82f6' },
       event: { text: 'Event', color: '#ef4444' },

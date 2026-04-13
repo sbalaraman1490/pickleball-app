@@ -4,7 +4,7 @@
   box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0,0,0,0.1));
   padding: 24px;
   margin-bottom: 28px;
-  border: 2px solid var(--primary, #065f46);
+  border: 2px solid var(--primary, #2563eb);
 }
 
 .compare-panel-header {
@@ -68,7 +68,7 @@
 .compare-price {
   font-size: 1.3rem;
   font-weight: 700;
-  color: var(--primary, #065f46);
+  color: var(--primary, #2563eb);
 }
 
 .compare-rating {
@@ -115,7 +115,7 @@
 }
 
 .compare-list.pros li svg {
-  color: var(--success, #10b981);
+  color: var(--success, #3b82f6);
   flex-shrink: 0;
 }
 
@@ -153,13 +153,13 @@
 }
 
 .filter-category:hover {
-  border-color: var(--primary, #065f46);
-  color: var(--primary, #065f46);
+  border-color: var(--primary, #2563eb);
+  color: var(--primary, #2563eb);
 }
 
 .filter-category.active {
-  background: var(--primary, #065f46);
-  border-color: var(--primary, #065f46);
+  background: var(--primary, #2563eb);
+  border-color: var(--primary, #2563eb);
   color: white;
 }
 
@@ -179,7 +179,7 @@
 }
 
 .filter-toggle:hover {
-  border-color: var(--primary, #065f46);
+  border-color: var(--primary, #2563eb);
 }
 
 /* Expanded Filters */
@@ -217,7 +217,7 @@
 
 .filter-group select:focus {
   outline: none;
-  border-color: var(--primary, #065f46);
+  border-color: var(--primary, #2563eb);
 }
 
 /* Paddles Grid */
@@ -246,7 +246,7 @@
 }
 
 .paddle-card.selected {
-  border-color: var(--primary, #065f46);
+  border-color: var(--primary, #2563eb);
   box-shadow: 0 0 0 4px rgba(6, 95, 70, 0.1);
 }
 
@@ -255,7 +255,7 @@
   position: absolute;
   top: 0;
   right: 0;
-  background: var(--primary, #065f46);
+  background: var(--primary, #2563eb);
   color: white;
   padding: 4px 12px;
   font-size: 0.75rem;
@@ -305,7 +305,7 @@
   gap: 4px;
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--primary, #065f46);
+  color: var(--primary, #2563eb);
 }
 
 .paddle-rating {
@@ -466,7 +466,7 @@
   align-items: center;
   justify-content: center;
   margin: 0 auto 24px;
-  color: #34d399;
+  color: #60a5fa;
 }
 
 .login-cta-card h3 {
@@ -500,7 +500,7 @@
 }
 
 .login-cta-features li svg {
-  color: #34d399;
+  color: #60a5fa;
 }
 
 .login-cta-buttons {
@@ -523,13 +523,13 @@
 }
 
 .login-cta-buttons .btn-primary {
-  background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   color: white;
   border: none;
 }
 
 .login-cta-buttons .btn-primary:hover {
-  background: linear-gradient(135deg, #047857 0%, #059669 100%);
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(6, 95, 70, 0.4);
 }

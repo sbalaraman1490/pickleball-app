@@ -69,7 +69,7 @@ function Dashboard() {
           </div>
         </div>
         <div className="stat-card stagger-2">
-          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
+          <div className="stat-icon" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' }}>
             <Users size={24} color="white" />
           </div>
           <div className="stat-content">

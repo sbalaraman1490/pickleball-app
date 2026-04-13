@@ -127,7 +127,7 @@ function PaddleCompare() {
     const colors = {
       control: '#3b82f6',
       power: '#ef4444',
-      balanced: '#10b981',
+      balanced: '#3b82f6',
       spin: '#f59e0b',
       budget: '#6b7280'
     };

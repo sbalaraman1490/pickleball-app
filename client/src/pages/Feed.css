@@ -29,7 +29,7 @@
 
 .feed-post-input textarea:focus {
   outline: none;
-  border-color: var(--primary, #065f46);
+  border-color: var(--primary, #2563eb);
   box-shadow: 0 0 0 4px rgba(6, 95, 70, 0.1);
 }
 
@@ -59,13 +59,13 @@
 }
 
 .feed-filter:hover {
-  border-color: var(--primary, #065f46);
-  color: var(--primary, #065f46);
+  border-color: var(--primary, #2563eb);
+  color: var(--primary, #2563eb);
 }
 
 .feed-filter.active {
-  background: var(--primary, #065f46);
-  border-color: var(--primary, #065f46);
+  background: var(--primary, #2563eb);
+  border-color: var(--primary, #2563eb);
   color: white;
 }
 
@@ -100,7 +100,7 @@
 .feed-avatar {
   width: 44px;
   height: 44px;
-  background: linear-gradient(135deg, var(--primary, #065f46) 0%, var(--primary-light, #059669) 100%);
+  background: linear-gradient(135deg, var(--primary, #2563eb) 0%, var(--primary-light, #2563eb) 100%);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -206,7 +206,7 @@
 }
 
 .feed-stat.highlight {
-  color: var(--primary, #065f46);
+  color: var(--primary, #2563eb);
   font-weight: 600;
 }
 
@@ -234,7 +234,7 @@
   display: inline-flex;
   align-self: flex-start;
   padding: 6px 12px;
-  background: var(--primary, #065f46);
+  background: var(--primary, #2563eb);
   color: white;
   border-radius: 20px;
   font-size: 0.8rem;
@@ -270,7 +270,7 @@
 }
 
 .feed-action.liked {
-  color: var(--primary, #065f46);
+  color: var(--primary, #2563eb);
   background: #d1fae5;
 }
 
@@ -288,7 +288,7 @@
   width: 40px;
   height: 40px;
   border: 3px solid var(--gray-200, #e2e8f0);
-  border-top-color: var(--primary, #065f46);
+  border-top-color: var(--primary, #2563eb);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

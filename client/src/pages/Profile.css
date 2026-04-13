@@ -26,7 +26,7 @@
 }
 
 .profile-tab.active {
-  background: #065f46;
+  background: #2563eb;
   color: white;
 }
 
@@ -66,7 +66,7 @@
 
 .profile-form .form-input:focus {
   outline: none;
-  border-color: #065f46;
+  border-color: #2563eb;
 }
 
 .profile-form .form-input:disabled {
@@ -96,7 +96,7 @@
 
 .profile-message.success {
   background: #d1fae5;
-  color: #065f46;
+  color: #2563eb;
   border: 1px solid #a7f3d0;
 }
 

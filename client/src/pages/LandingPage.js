@@ -145,7 +145,7 @@ function LandingPage() {
           </Link>
           
           <Link to="/feed" className="feature-card">
-            <div className="feature-icon-wrapper" style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' }}>
+            <div className="feature-icon-wrapper" style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' }}>
               <MessageSquare size={32} color="white" />
             </div>
             <h3>Community Feed</h3>
