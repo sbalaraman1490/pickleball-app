@@ -501,6 +501,37 @@
   margin: 0 auto;
 }
 
+.drills-cta {
+  text-align: center;
+  padding: 20px 0;
+}
+
+.drills-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: white;
+  padding: 16px 32px;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.drills-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+}
+
+.drills-note {
+  margin-top: 20px;
+  font-size: 1rem;
+  color: #6b7280;
+}
+
 .videos-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

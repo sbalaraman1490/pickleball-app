@@ -170,69 +170,19 @@ function LandingPage() {
           <div className="section-header">
             <Play className="section-icon" />
             <h2>Pickleball Drills</h2>
-            <p>Improve your game with these professional drills and tutorials</p>
+            <p>Improve your game with professional drills and tutorials from top coaches</p>
           </div>
-          <div className="videos-grid">
-            <a href="https://www.youtube.com/watch?v=F3zM_o372Ww" target="_blank" rel="noopener noreferrer" className="video-card">
-              <div className="video-thumbnail">
-                <div className="play-button">
-                  <Play size={32} />
-                </div>
-                <span className="video-duration">8:24</span>
-              </div>
-              <h3>The Dink Game</h3>
-              <p>Master the soft game with this essential dinking drill</p>
+          <div className="drills-cta">
+            <a 
+              href="https://www.youtube.com/results?search_query=pickleball+drills+for+beginners" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="drills-button"
+            >
+              <Play size={24} />
+              Watch Pickleball Drills on YouTube
             </a>
-            <a href="https://www.youtube.com/watch?v=3Vv3DwQq4Kk" target="_blank" rel="noopener noreferrer" className="video-card">
-              <div className="video-thumbnail">
-                <div className="play-button">
-                  <Play size={32} />
-                </div>
-                <span className="video-duration">12:15</span>
-              </div>
-              <h3>Third Shot Drop</h3>
-              <p>Perfect your transition from serve to the net</p>
-            </a>
-            <a href="https://www.youtube.com/watch?v=8Y_8H2n1LwM" target="_blank" rel="noopener noreferrer" className="video-card">
-              <div className="video-thumbnail">
-                <div className="play-button">
-                  <Play size={32} />
-                </div>
-                <span className="video-duration">6:42</span>
-              </div>
-              <h3>Volley at the Net</h3>
-              <p>Fast-paced volley exchanges to sharpen your reflexes</p>
-            </a>
-            <a href="https://www.youtube.com/watch?v=5qTGi_6S6zA" target="_blank" rel="noopener noreferrer" className="video-card">
-              <div className="video-thumbnail">
-                <div className="play-button">
-                  <Play size={32} />
-                </div>
-                <span className="video-duration">9:30</span>
-              </div>
-              <h3>Footwork Fundamentals</h3>
-              <p>Quick and agile movement patterns for all court positions</p>
-            </a>
-            <a href="https://www.youtube.com/watch?v=9hnJsN5sy8A" target="_blank" rel="noopener noreferrer" className="video-card">
-              <div className="video-thumbnail">
-                <div className="play-button">
-                  <Play size={32} />
-                </div>
-                <span className="video-duration">7:18</span>
-              </div>
-              <h3>Power Serve Drill</h3>
-              <p>Develop a consistent and powerful serve technique</p>
-            </a>
-            <a href="https://www.youtube.com/watch?v=1V7m4H-2h6I" target="_blank" rel="noopener noreferrer" className="video-card">
-              <div className="video-thumbnail">
-                <div className="play-button">
-                  <Play size={32} />
-                </div>
-                <span className="video-duration">10:05</span>
-              </div>
-              <h3>Lob Defense</h3>
-              <p>How to handle high lobs and maintain court position</p>
-            </a>
+            <p className="drills-note">Learn dinking, third shot drops, volleys, footwork, serves, and more from professional instructors</p>
           </div>
         </div>
       </section>
