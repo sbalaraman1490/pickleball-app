@@ -1,8 +1,8 @@
 /* Landing Page Styles */
 .landing-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #4ade80 0%, #facc15 50%, #a3e635 100%);
-  color: #2563eb;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 50%, #93c5fd 100%);
+  color: #1e3a5f;
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
 }
