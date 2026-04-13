@@ -279,20 +279,21 @@
 }
 
 .footer-links a {
-  color: #2563eb;
+  color: #1e3a5f;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
   transition: opacity 0.2s;
 }
 
 .footer-links a:hover {
-  opacity: 0.7;
+  color: #0f172a;
   text-decoration: underline;
 }
 
 .footer-copyright {
   font-size: 0.9rem;
-  opacity: 0.8;
+  color: #1e3a5f;
+  font-weight: 500;
   margin: 0;
 }
 
