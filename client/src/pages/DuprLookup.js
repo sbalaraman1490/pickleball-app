@@ -61,12 +61,8 @@ const DuprLookup = () => {
     formData.append('excelFile', uploadFile);
 
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch('/api/dupr/upload', {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
         body: formData
       });
 
@@ -95,12 +91,10 @@ const DuprLookup = () => {
     setError('');
 
     try {
-      const token = localStorage.getItem('token');
       const response = await fetch('/api/dupr/search', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(singleSearch)
       });

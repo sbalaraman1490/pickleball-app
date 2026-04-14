@@ -1627,7 +1627,7 @@ app.post('/api/paddles/refresh', authenticateToken, requireAdmin, async (req, re
 });
 
 // Upload Excel file and process DUPR lookups
-app.post('/api/dupr/upload', authenticateToken, upload.single('excelFile'), async (req, res) => {
+app.post('/api/dupr/upload', upload.single('excelFile'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -1717,7 +1717,7 @@ app.post('/api/dupr/upload', authenticateToken, upload.single('excelFile'), asyn
 });
 
 // Get DUPR results for an upload
-app.get('/api/dupr/results/:uploadId', authenticateToken, (req, res) => {
+app.get('/api/dupr/results/:uploadId', (req, res) => {
   const { uploadId } = req.params;
   
   db.all(
@@ -1739,7 +1739,7 @@ app.get('/api/dupr/results/:uploadId', authenticateToken, (req, res) => {
 });
 
 // Get all DUPR results for user
-app.get('/api/dupr/results', authenticateToken, (req, res) => {
+app.get('/api/dupr/results', (req, res) => {
   db.all(
     `SELECT * FROM dupr_results ORDER BY created_at DESC LIMIT 100`,
     (err, rows) => {
@@ -1757,7 +1757,7 @@ app.get('/api/dupr/results', authenticateToken, (req, res) => {
 });
 
 // Search DUPR for single player
-app.post('/api/dupr/search', authenticateToken, async (req, res) => {
+app.post('/api/dupr/search', async (req, res) => {
   try {
     const { firstName, lastName, state = 'GA' } = req.body;
     
