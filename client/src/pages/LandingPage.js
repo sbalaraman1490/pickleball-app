@@ -158,6 +158,7 @@ function LandingPage() {
           <Link to="/rules">Rules</Link>
           <Link to="/feed">Feed</Link>
           <Link to="/paddles">Paddles</Link>
+          <Link to="/dupr">DUPR Lookup</Link>
           <Link to="/login">Login</Link>
           <Link to="/signup">Sign Up</Link>
         </div>

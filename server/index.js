@@ -5,6 +5,9 @@ const sqlite3 = require('sqlite3').verbose();
 const { v4: uuidv4 } = require('uuid');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const xlsx = require('xlsx');
+const axios = require('axios');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dinkans-secret-key-change-in-production';
 
@@ -321,6 +324,22 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024 // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
+        file.mimetype === 'application/vnd.ms-excel') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only Excel files are allowed'), false);
+    }
+  }
+});
+
 // Serve static files from React build
 app.use(express.static(path.join(__dirname, '../client/build')));
 
@@ -415,6 +434,19 @@ db.serialize(() => {
     used BOOLEAN DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
+  )`);
+
+  // DUPR results table
+  db.run(`CREATE TABLE IF NOT EXISTS dupr_results (
+    id TEXT PRIMARY KEY,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    state TEXT DEFAULT 'GA',
+    dupr_rating REAL,
+    doubles_reliability REAL,
+    search_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    upload_id TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 });
 
@@ -1591,6 +1623,167 @@ app.post('/api/paddles/refresh', authenticateToken, requireAdmin, async (req, re
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Upload Excel file and process DUPR lookups
+app.post('/api/dupr/upload', authenticateToken, upload.single('excelFile'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const uploadId = uuidv4();
+    const results = [];
+    const errors = [];
+
+    try {
+      // Parse Excel file
+      const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const data = xlsx.utils.sheet_to_json(worksheet);
+
+      for (let i = 0; i < data.length; i++) {
+        const row = data[i];
+        
+        // Try different possible column names
+        const firstName = row['First Name'] || row['firstName'] || row['first_name'] || row['FirstName'];
+        const lastName = row['Last Name'] || row['lastName'] || row['last_name'] || row['LastName'];
+
+        if (!firstName || !lastName) {
+          errors.push({
+            row: i + 2, // Excel rows are 1-indexed, plus header row
+            error: 'Missing First Name or Last Name',
+            data: row
+          });
+          continue;
+        }
+
+        // Search DUPR rating
+        const duprResult = await searchDUPR(firstName.trim(), lastName.trim());
+        
+        if (duprResult.success) {
+          // Save to database
+          const resultId = uuidv4();
+          db.run(
+            `INSERT INTO dupr_results (id, first_name, last_name, state, dupr_rating, doubles_reliability, upload_id) 
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [resultId, duprResult.firstName, duprResult.lastName, duprResult.state, 
+             duprResult.duprRating, duprResult.doublesReliability, uploadId]
+          );
+
+          results.push({
+            id: resultId,
+            firstName: duprResult.firstName,
+            lastName: duprResult.lastName,
+            state: duprResult.state,
+            duprRating: duprResult.duprRating,
+            doublesReliability: duprResult.doublesReliability
+          });
+        } else {
+          errors.push({
+            row: i + 2,
+            error: `DUPR lookup failed: ${duprResult.error}`,
+            data: { firstName, lastName }
+          });
+        }
+
+        // Add delay to avoid rate limiting
+        if (i < data.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      res.json({
+        success: true,
+        uploadId,
+        totalProcessed: data.length,
+        successful: results.length,
+        failed: errors.length,
+        results,
+        errors
+      });
+
+    } catch (parseError) {
+      console.error('Error parsing Excel file:', parseError);
+      res.status(400).json({ error: 'Failed to parse Excel file: ' + parseError.message });
+    }
+
+  } catch (error) {
+    console.error('Error processing DUPR upload:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get DUPR results for an upload
+app.get('/api/dupr/results/:uploadId', authenticateToken, (req, res) => {
+  const { uploadId } = req.params;
+  
+  db.all(
+    `SELECT * FROM dupr_results WHERE upload_id = ? ORDER BY created_at DESC`,
+    [uploadId],
+    (err, rows) => {
+      if (err) {
+        console.error('Error fetching DUPR results:', err);
+        return res.status(500).json({ error: 'Database error' });
+      }
+      
+      res.json({
+        success: true,
+        uploadId,
+        results: rows
+      });
+    }
+  );
+});
+
+// Get all DUPR results for user
+app.get('/api/dupr/results', authenticateToken, (req, res) => {
+  db.all(
+    `SELECT * FROM dupr_results ORDER BY created_at DESC LIMIT 100`,
+    (err, rows) => {
+      if (err) {
+        console.error('Error fetching DUPR results:', err);
+        return res.status(500).json({ error: 'Database error' });
+      }
+      
+      res.json({
+        success: true,
+        results: rows
+      });
+    }
+  );
+});
+
+// Search DUPR for single player
+app.post('/api/dupr/search', authenticateToken, async (req, res) => {
+  try {
+    const { firstName, lastName, state = 'GA' } = req.body;
+    
+    if (!firstName || !lastName) {
+      return res.status(400).json({ error: 'First name and last name are required' });
+    }
+
+    const result = await searchDUPR(firstName.trim(), lastName.trim(), state);
+    
+    if (result.success) {
+      // Save to database
+      const resultId = uuidv4();
+      db.run(
+        `INSERT INTO dupr_results (id, first_name, last_name, state, dupr_rating, doubles_reliability) 
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [resultId, result.firstName, result.lastName, result.state, 
+         result.duprRating, result.doublesReliability]
+      );
+      
+      res.json(result);
+    } else {
+      res.status(404).json(result);
+    }
+  } catch (error) {
+    console.error('Error searching DUPR:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

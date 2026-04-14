@@ -10,6 +10,7 @@ import ResetPassword from './pages/ResetPassword';
 import Rules from './pages/Rules';
 import Feed from './pages/Feed';
 import PaddleCompare from './pages/PaddleCompare';
+import DuprLookup from './pages/DuprLookup';
 import AppLayout from './AppLayout';
 import PublicLayout from './PublicLayout';
 import './App.css';
@@ -30,6 +31,7 @@ function App() {
           <Route path="/rules" element={<PublicLayout><Rules /></PublicLayout>} />
           <Route path="/feed" element={<PublicLayout><Feed /></PublicLayout>} />
           <Route path="/paddles" element={<PublicLayout><PaddleCompare /></PublicLayout>} />
+          <Route path="/dupr" element={<PublicLayout><DuprLookup /></PublicLayout>} />
           
           {/* Protected App Routes */}
           <Route path="/app/*" element={
