@@ -1947,6 +1947,353 @@ async function searchDUPRDirect(firstName, lastName, state) {
   }
 }
 
+// ========== ALTERNATIVE DUPR DATA APPROACHES ==========
+
+// Approach 1: Import DUPR data from CSV export (from DUPR club admin)
+app.post('/api/dupr/import-csv', upload.single('csvFile'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No CSV file uploaded' });
+    }
+
+    const results = [];
+    const errors = [];
+    let processedCount = 0;
+
+    try {
+      // Parse CSV file
+      const csvContent = req.file.buffer.toString('utf-8');
+      const lines = csvContent.split('\n');
+      
+      // Detect header row
+      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+      
+      // Map common DUPR CSV column names
+      const firstNameIndex = headers.findIndex(h => 
+        h.toLowerCase().includes('first') || h.toLowerCase().includes('firstname'));
+      const lastNameIndex = headers.findIndex(h => 
+        h.toLowerCase().includes('last') || h.toLowerCase().includes('lastname'));
+      const duprIdIndex = headers.findIndex(h => 
+        h.toLowerCase().includes('dupr_id') || h.toLowerCase().includes('player_id'));
+      const ratingIndex = headers.findIndex(h => 
+        h.toLowerCase().includes('rating') || h.toLowerCase().includes('dupr_rating'));
+      const reliabilityIndex = headers.findIndex(h => 
+        h.toLowerCase().includes('reliability') || h.toLowerCase().includes('doubles_reliability'));
+      const stateIndex = headers.findIndex(h => h.toLowerCase().includes('state'));
+
+      if (firstNameIndex === -1 || lastNameIndex === -1) {
+        return res.status(400).json({ 
+          error: 'CSV must contain First Name and Last Name columns' 
+        });
+      }
+
+      // Process each row
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+
+        const columns = line.split(',').map(c => c.trim().replace(/"/g, ''));
+        
+        const firstName = columns[firstNameIndex];
+        const lastName = columns[lastNameIndex];
+        const duprId = duprIdIndex !== -1 ? columns[duprIdIndex] : null;
+        const rating = ratingIndex !== -1 ? parseFloat(columns[ratingIndex]) : null;
+        const reliability = reliabilityIndex !== -1 ? parseInt(columns[reliabilityIndex]) : null;
+        const state = stateIndex !== -1 ? columns[stateIndex] : 'GA';
+
+        if (!firstName || !lastName) {
+          errors.push({ row: i + 1, error: 'Missing name' });
+          continue;
+        }
+
+        // Save to database
+        const resultId = uuidv4();
+        db.run(
+          `INSERT INTO dupr_results (id, first_name, last_name, state, dupr_rating, doubles_reliability, player_id, source) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [resultId, firstName, lastName, state, rating, reliability, duprId, 'csv_import'],
+          (err) => {
+            if (err) {
+              console.error('Error saving CSV import:', err);
+            }
+          }
+        );
+
+        results.push({
+          id: resultId,
+          firstName,
+          lastName,
+          state,
+          duprRating: rating,
+          doublesReliability: reliability,
+          playerId: duprId,
+          source: 'csv_import'
+        });
+        
+        processedCount++;
+      }
+
+      res.json({
+        success: true,
+        processed: processedCount,
+        imported: results.length,
+        errors: errors.length,
+        results,
+        errors: errors.slice(0, 10) // Limit error display
+      });
+
+    } catch (parseError) {
+      console.error('Error parsing CSV:', parseError);
+      res.status(400).json({ error: 'Failed to parse CSV file' });
+    }
+
+  } catch (error) {
+    console.error('Error importing CSV:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Approach 2: Lookup by DUPR Player ID (publicly accessible)
+app.get('/api/dupr/player/:playerId', async (req, res) => {
+  try {
+    const { playerId } = req.params;
+    
+    // Try to fetch player data by DUPR ID
+    const playerUrl = `https://www.dupr.com/player/${playerId}`;
+    
+    const response = await axios.get(playerUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+      },
+      timeout: 10000
+    });
+
+    const html = response.data;
+    
+    // Extract player data from the page
+    const nameMatch = html.match(/"firstName":"([^"]+)","lastName":"([^"]+)"/);
+    const ratingMatch = html.match(/"rating":([0-9.]+)/);
+    const reliabilityMatch = html.match(/"doublesReliability":(\d+)/);
+    const stateMatch = html.match(/"state":"([^"]+)"/);
+
+    if (nameMatch && ratingMatch) {
+      const [, firstName, lastName] = nameMatch;
+      const rating = parseFloat(ratingMatch[1]);
+      const reliability = reliabilityMatch ? parseInt(reliabilityMatch[1]) : 85;
+      const state = stateMatch ? stateMatch[1] : 'Unknown';
+
+      // Save to database
+      const resultId = uuidv4();
+      db.run(
+        `INSERT INTO dupr_results (id, first_name, last_name, state, dupr_rating, doubles_reliability, player_id, source) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [resultId, firstName, lastName, state, rating, reliability, playerId, 'dupr_id_lookup']
+      );
+
+      res.json({
+        success: true,
+        firstName,
+        lastName,
+        state,
+        duprRating: rating,
+        doublesReliability: reliability,
+        playerId,
+        source: 'dupr_id_lookup'
+      });
+    } else {
+      res.status(404).json({
+        success: false,
+        error: 'Player not found with this DUPR ID'
+      });
+    }
+
+  } catch (error) {
+    console.error('Error looking up player by ID:', error);
+    res.status(500).json({ error: 'Failed to fetch player data' });
+  }
+});
+
+// Approach 3: Manual entry with photo verification
+app.post('/api/dupr/manual-entry', async (req, res) => {
+  try {
+    const { firstName, lastName, state, duprRating, doublesReliability, verificationImage, notes } = req.body;
+    
+    if (!firstName || !lastName || !duprRating) {
+      return res.status(400).json({ error: 'First name, last name, and DUPR rating are required' });
+    }
+
+    const resultId = uuidv4();
+    
+    db.run(
+      `INSERT INTO dupr_results (id, first_name, last_name, state, dupr_rating, doubles_reliability, source, notes) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [resultId, firstName, lastName, state || 'GA', duprRating, doublesReliability || 85, 'manual_entry', notes || ''],
+      (err) => {
+        if (err) {
+          console.error('Error saving manual entry:', err);
+          return res.status(500).json({ error: 'Failed to save manual entry' });
+        }
+
+        res.json({
+          success: true,
+          id: resultId,
+          firstName,
+          lastName,
+          state: state || 'GA',
+          duprRating,
+          doublesReliability: doublesReliability || 85,
+          source: 'manual_entry',
+          notes: notes || '',
+          verificationRequired: !verificationImage,
+          message: verificationImage ? 'Entry saved with verification' : 'Entry saved - verification recommended'
+        });
+      }
+    );
+
+  } catch (error) {
+    console.error('Error with manual entry:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Approach 4: Tournament Results URL Parser
+app.post('/api/dupr/parse-tournament', async (req, res) => {
+  try {
+    const { tournamentUrl } = req.body;
+    
+    if (!tournamentUrl) {
+      return res.status(400).json({ error: 'Tournament URL is required' });
+    }
+
+    // Support multiple tournament platforms
+    let results = [];
+    
+    if (tournamentUrl.includes('pickleballtournaments.com')) {
+      results = await parsePickleballTournaments(tournamentUrl);
+    } else if (tournamentUrl.includes('pickleballbrackets.com')) {
+      results = await parsePickleballBrackets(tournamentUrl);
+    } else if (tournamentUrl.includes('tournamentsoftware.com')) {
+      results = await parseTournamentSoftware(tournamentUrl);
+    } else {
+      return res.status(400).json({ error: 'Unsupported tournament platform' });
+    }
+
+    res.json({
+      success: true,
+      tournament: tournamentUrl,
+      playersFound: results.length,
+      results
+    });
+
+  } catch (error) {
+    console.error('Error parsing tournament:', error);
+    res.status(500).json({ error: 'Failed to parse tournament results' });
+  }
+});
+
+// Helper function to parse PickleballTournaments.com
+async function parsePickleballTournaments(url) {
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      },
+      timeout: 15000
+    });
+
+    const html = response.data;
+    const results = [];
+    
+    // Look for player data in the page
+    const playerRegex = /player[^}]*"firstName":"([^"]+)"[^}]*"lastName":"([^"]+)"[^}]*"duprRating":([0-9.]+)/g;
+    let match;
+    
+    while ((match = playerRegex.exec(html)) !== null) {
+      const [, firstName, lastName, rating] = match;
+      results.push({
+        firstName,
+        lastName,
+        duprRating: parseFloat(rating),
+        source: 'tournament_pickleballtournaments'
+      });
+    }
+
+    return results;
+  } catch (error) {
+    console.error('Error parsing pickleballtournaments.com:', error);
+    return [];
+  }
+}
+
+// Helper function to parse PickleballBrackets.com
+async function parsePickleballBrackets(url) {
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      },
+      timeout: 15000
+    });
+
+    const html = response.data;
+    const results = [];
+    
+    // Look for player data
+    const playerRegex = /player[^}]*"firstName":"([^"]+)"[^}]*"lastName":"([^"]+)"[^}]*"rating":([0-9.]+)/g;
+    let match;
+    
+    while ((match = playerRegex.exec(html)) !== null) {
+      const [, firstName, lastName, rating] = match;
+      results.push({
+        firstName,
+        lastName,
+        duprRating: parseFloat(rating),
+        source: 'tournament_pickleballbrackets'
+      });
+    }
+
+    return results;
+  } catch (error) {
+    console.error('Error parsing pickleballbrackets.com:', error);
+    return [];
+  }
+}
+
+// Helper function to parse TournamentSoftware
+async function parseTournamentSoftware(url) {
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      },
+      timeout: 15000
+    });
+
+    const html = response.data;
+    const results = [];
+    
+    // Look for player data
+    const playerRegex = /"firstName":"([^"]+)"[^}]*"lastName":"([^"]+)"[^}]*"dupr":([0-9.]+)/g;
+    let match;
+    
+    while ((match = playerRegex.exec(html)) !== null) {
+      const [, firstName, lastName, rating] = match;
+      results.push({
+        firstName,
+        lastName,
+        duprRating: parseFloat(rating),
+        source: 'tournament_software'
+      });
+    }
+
+    return results;
+  } catch (error) {
+    console.error('Error parsing tournamentsoftware.com:', error);
+    return [];
+  }
+}
+
 // Fallback web scraping method for DUPR
 async function searchDUPRWebScraping(firstName, lastName, state = 'GA') {
   try {
