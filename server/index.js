@@ -1631,91 +1631,147 @@ app.post('/api/paddles/refresh', authenticateToken, requireAdmin, async (req, re
 // Search DUPR rating for a single player using real DUPR data
 async function searchDUPR(firstName, lastName, state = 'GA') {
   try {
-    // Use DUPR's actual public search endpoint
-    const searchUrl = `https://www.dupr.com/api/v1/search/players`;
-    
-    const response = await axios.get(searchUrl, {
-      params: {
-        q: `${firstName} ${lastName}`,
+    // Method 1: Try DUPR's public GraphQL API (used by their website)
+    const graphqlQuery = {
+      query: `
+        query SearchPlayers($query: String!, $state: String, $limit: Int) {
+          searchPlayers(query: $query, state: $state, limit: $limit) {
+            id
+            firstName
+            lastName
+            state
+            city
+            rating
+            doublesReliability
+            gender
+            age
+            club {
+              name
+            }
+          }
+        }
+      `,
+      variables: {
+        query: `${firstName} ${lastName}`,
         state: state,
         limit: 10
-      },
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'application/json',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Origin': 'https://www.dupr.com',
-        'Referer': 'https://www.dupr.com/',
-        'Sec-Fetch-Dest': 'empty',
-        'Sec-Fetch-Mode': 'cors',
-        'Sec-Fetch-Site': 'same-origin'
-      },
-      timeout: 15000
-    });
-
-    if (response.data && response.data.data && response.data.data.length > 0) {
-      // Find the best match based on name and state
-      const player = response.data.data.find(p => 
-        p.attributes.firstName.toLowerCase() === firstName.toLowerCase() && 
-        p.attributes.lastName.toLowerCase() === lastName.toLowerCase() &&
-        p.attributes.state === state
-      ) || response.data.data.find(p => 
-        p.attributes.firstName.toLowerCase() === firstName.toLowerCase() && 
-        p.attributes.lastName.toLowerCase() === lastName.toLowerCase()
-      ) || response.data.data[0]; // Fallback to first result
-
-      if (player && player.attributes) {
-        const attr = player.attributes;
-        return {
-          success: true,
-          firstName: attr.firstName,
-          lastName: attr.lastName,
-          state: attr.state || state,
-          duprRating: attr.rating || attr.duprRating,
-          doublesReliability: attr.doublesReliability || attr.reliability || 85,
-          playerId: player.id,
-          city: attr.city,
-          club: attr.club,
-          gender: attr.gender,
-          age: attr.age,
-          source: 'dupr_api'
-        };
       }
-    }
+    };
 
-    // Try alternative search endpoint
-    const altSearchUrl = `https://www.dupr.com/api/players/search`;
-    const altResponse = await axios.get(altSearchUrl, {
-      params: {
-        first_name: firstName,
-        last_name: lastName,
-        state: state,
-        limit: 5
-      },
+    const response = await axios.post('https://www.dupr.com/graphql', graphqlQuery, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'application/json',
+        'Content-Type': 'application/json',
         'Origin': 'https://www.dupr.com',
         'Referer': 'https://www.dupr.com/'
       },
       timeout: 15000
     });
 
-    if (altResponse.data && altResponse.data.length > 0) {
-      const player = altResponse.data[0];
-      return {
-        success: true,
-        firstName: player.firstName || firstName,
-        lastName: player.lastName || lastName,
-        state: player.state || state,
-        duprRating: player.rating || player.duprRating,
-        doublesReliability: player.doublesReliability || player.reliability || 85,
-        playerId: player.id,
-        city: player.city,
-        club: player.club,
-        source: 'dupr_alt_api'
-      };
+    if (response.data && response.data.data && response.data.data.searchPlayers && response.data.data.searchPlayers.length > 0) {
+      // Find the best match
+      const players = response.data.data.searchPlayers;
+      const player = players.find(p => 
+        p.firstName.toLowerCase() === firstName.toLowerCase() && 
+        p.lastName.toLowerCase() === lastName.toLowerCase() &&
+        p.state === state
+      ) || players.find(p => 
+        p.firstName.toLowerCase() === firstName.toLowerCase() && 
+        p.lastName.toLowerCase() === lastName.toLowerCase()
+      ) || players[0];
+
+      if (player) {
+        return {
+          success: true,
+          firstName: player.firstName,
+          lastName: player.lastName,
+          state: player.state || state,
+          duprRating: player.rating,
+          doublesReliability: player.doublesReliability || 85,
+          playerId: player.id,
+          city: player.city,
+          club: player.club?.name,
+          gender: player.gender,
+          age: player.age,
+          source: 'dupr_graphql'
+        };
+      }
+    }
+
+    // Method 2: Try direct player profile URL extraction
+    const profileUrl = `https://www.dupr.com/players/${firstName.toLowerCase()}-${lastName.toLowerCase()}-${state.toLowerCase()}`;
+    const profileResponse = await axios.get(profileUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br'
+      },
+      timeout: 15000
+    });
+
+    // Extract data from the HTML using regex patterns
+    const html = profileResponse.data;
+    
+    // Look for JSON data embedded in the page
+    const jsonDataRegex = /window\.__INITIAL_STATE__\s*=\s*({.+?});/;
+    const jsonMatch = html.match(jsonDataRegex);
+    
+    if (jsonMatch) {
+      try {
+        const pageData = JSON.parse(jsonMatch[1]);
+        if (pageData.player) {
+          const player = pageData.player;
+          return {
+            success: true,
+            firstName: player.firstName,
+            lastName: player.lastName,
+            state: player.state || state,
+            duprRating: player.rating,
+            doublesReliability: player.doublesReliability || 85,
+            playerId: player.id,
+            city: player.city,
+            club: player.club?.name,
+            source: 'dupr_profile'
+          };
+        }
+      } catch (parseError) {
+        console.error('Failed to parse player data from profile page:', parseError);
+      }
+    }
+
+    // Method 3: Extract data using regex patterns from HTML
+    const ratingRegex = /"rating":\s*([0-9.]+)/;
+    const nameRegex = /"firstName":\s*"([^"]+).*?"lastName":\s*"([^"]+)"/;
+    const stateRegex = /"state":\s*"([^"]+)"/;
+    const reliabilityRegex = /"doublesReliability":\s*(\d+)/;
+
+    const ratingMatch = html.match(ratingRegex);
+    const nameMatch = html.match(nameRegex);
+    const stateMatch = html.match(stateRegex);
+    const reliabilityMatch = html.match(reliabilityRegex);
+
+    if (ratingMatch && nameMatch) {
+      const [, rating] = ratingMatch;
+      const [, first, last] = nameMatch;
+      const playerState = stateMatch ? stateMatch[1] : state;
+      const reliability = reliabilityMatch ? reliabilityMatch[1] : 85;
+
+      // Verify this matches our search
+      if (first.toLowerCase() === firstName.toLowerCase() && 
+          last.toLowerCase() === lastName.toLowerCase()) {
+        
+        return {
+          success: true,
+          firstName: first,
+          lastName: last,
+          state: playerState,
+          duprRating: parseFloat(rating),
+          doublesReliability: parseInt(reliability),
+          source: 'dupr_html_extract'
+        };
+      }
     }
 
     return {
@@ -1723,28 +1779,21 @@ async function searchDUPR(firstName, lastName, state = 'GA') {
       error: `Player ${firstName} ${lastName} not found in DUPR database for ${state}`,
       firstName,
       lastName,
-      state
+      state,
+      suggestion: 'Please verify the player name and state are correct, and that the player has a DUPR profile.'
     };
 
   } catch (error) {
-    console.error('Error searching DUPR API:', error.message);
+    console.error('Error searching DUPR:', error.message);
     
-    // If API fails, try web scraping as fallback
-    try {
-      return await searchDUPRWebScraping(firstName, lastName, state);
-    } catch (scrapeError) {
-      console.error('Web scraping also failed:', scrapeError.message);
-      
-      // Final fallback - return informative error
-      return {
-        success: false,
-        error: `DUPR data unavailable: ${error.message}. This may be due to API restrictions or the player not existing in DUPR's database.`,
-        firstName,
-        lastName,
-        state,
-        suggestion: 'Please verify the player exists in DUPR and try again, or contact DUPR for API access.'
-      };
-    }
+    return {
+      success: false,
+      error: `Unable to fetch DUPR data: ${error.message}. DUPR may be restricting access or the player may not exist.`,
+      firstName,
+      lastName,
+      state,
+      suggestion: 'For guaranteed access to DUPR data, consider applying for DUPR\'s official API access at https://www.dupr.com/developers'
+    };
   }
 }
 
