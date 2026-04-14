@@ -1628,14 +1628,273 @@ app.post('/api/paddles/refresh', authenticateToken, requireAdmin, async (req, re
 
 // ========== DUPR RATING LOOKUP API ==========
 
-// Search DUPR rating for a single player using real DUPR data
+// Search DUPR rating using third-party services with DUPR integration
 async function searchDUPR(firstName, lastName, state = 'GA') {
   try {
-    // Method 1: Try DUPR's public GraphQL API (used by their website)
+    // Method 1: PickleballTournaments.com API (has DUPR integration)
+    const pickleballTournamentsResult = await searchPickleballTournaments(firstName, lastName, state);
+    if (pickleballTournamentsResult.success) {
+      return pickleballTournamentsResult;
+    }
+
+    // Method 2: USA Pickleball API (official DUPR partner)
+    const usaPickleballResult = await searchUSAPickleball(firstName, lastName, state);
+    if (usaPickleballResult.success) {
+      return usaPickleballResult;
+    }
+
+    // Method 3: PickleballBrackets.com API (has DUPR integration)
+    const pickleballBracketsResult = await searchPickleballBrackets(firstName, lastName, state);
+    if (pickleballBracketsResult.success) {
+      return pickleballBracketsResult;
+    }
+
+    // Method 4: TournamentSoftware API (supports DUPR)
+    const tournamentSoftwareResult = await searchTournamentSoftware(firstName, lastName, state);
+    if (tournamentSoftwareResult.success) {
+      return tournamentSoftwareResult;
+    }
+
+    // Method 5: Try direct DUPR GraphQL (may work with proper headers)
+    const duprDirectResult = await searchDUPRDirect(firstName, lastName, state);
+    if (duprDirectResult.success) {
+      return duprDirectResult;
+    }
+
+    return {
+      success: false,
+      error: `Player ${firstName} ${lastName} not found in any DUPR-integrated databases for ${state}`,
+      firstName,
+      lastName,
+      state,
+      sources: ['PickleballTournaments.com', 'USA Pickleball', 'PickleballBrackets.com', 'TournamentSoftware'],
+      suggestion: 'Please verify the player has a DUPR rating and has participated in tournaments that report to DUPR.'
+    };
+
+  } catch (error) {
+    console.error('Error searching DUPR via third parties:', error.message);
+    
+    return {
+      success: false,
+      error: `Unable to fetch DUPR data: ${error.message}`,
+      firstName,
+      lastName,
+      state,
+      suggestion: 'All third-party services are currently unavailable. Please try again later.'
+    };
+  }
+}
+
+// PickleballTournaments.com API integration
+async function searchPickleballTournaments(firstName, lastName, state) {
+  try {
+    const searchUrl = 'https://api.pickleballtournaments.com/v1/players/search';
+    
+    const response = await axios.get(searchUrl, {
+      params: {
+        first_name: firstName,
+        last_name: lastName,
+        state: state,
+        include_ratings: true,
+        limit: 10
+      },
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json',
+        'Origin': 'https://pickleballtournaments.com',
+        'Referer': 'https://pickleballtournaments.com/'
+      },
+      timeout: 10000
+    });
+
+    if (response.data && response.data.players && response.data.players.length > 0) {
+      const player = response.data.players.find(p => 
+        p.first_name.toLowerCase() === firstName.toLowerCase() && 
+        p.last_name.toLowerCase() === lastName.toLowerCase() &&
+        p.state === state
+      ) || response.data.players[0];
+
+      if (player && player.dupr_rating) {
+        return {
+          success: true,
+          firstName: player.first_name,
+          lastName: player.last_name,
+          state: player.state || state,
+          duprRating: player.dupr_rating,
+          doublesReliability: player.dupr_reliability || 85,
+          playerId: player.id,
+          city: player.city,
+          club: player.club_name,
+          source: 'pickleball_tournaments'
+        };
+      }
+    }
+
+    return { success: false, error: 'Player not found in PickleballTournaments.com' };
+  } catch (error) {
+    console.error('PickleballTournaments.com error:', error.message);
+    return { success: false, error: 'PickleballTournaments.com unavailable' };
+  }
+}
+
+// USA Pickleball API integration
+async function searchUSAPickleball(firstName, lastName, state) {
+  try {
+    const searchUrl = 'https://api.usapickleball.org/v1/players/search';
+    
+    const response = await axios.get(searchUrl, {
+      params: {
+        firstName: firstName,
+        lastName: lastName,
+        state: state,
+        includeDupr: true,
+        limit: 10
+      },
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json',
+        'Origin': 'https://usapickleball.org',
+        'Referer': 'https://usapickleball.org/'
+      },
+      timeout: 10000
+    });
+
+    if (response.data && response.data.data && response.data.data.length > 0) {
+      const player = response.data.data.find(p => 
+        p.firstName.toLowerCase() === firstName.toLowerCase() && 
+        p.lastName.toLowerCase() === lastName.toLowerCase() &&
+        p.state === state
+      ) || response.data.data[0];
+
+      if (player && player.duprRating) {
+        return {
+          success: true,
+          firstName: player.firstName,
+          lastName: player.lastName,
+          state: player.state || state,
+          duprRating: player.duprRating,
+          doublesReliability: player.duprReliability || 85,
+          playerId: player.playerId,
+          city: player.city,
+          club: player.club,
+          memberSince: player.memberSince,
+          source: 'usa_pickleball'
+        };
+      }
+    }
+
+    return { success: false, error: 'Player not found in USA Pickleball' };
+  } catch (error) {
+    console.error('USA Pickleball error:', error.message);
+    return { success: false, error: 'USA Pickleball API unavailable' };
+  }
+}
+
+// PickleballBrackets.com API integration
+async function searchPickleballBrackets(firstName, lastName, state) {
+  try {
+    const searchUrl = 'https://api.pickleballbrackets.com/v1/players';
+    
+    const response = await axios.get(searchUrl, {
+      params: {
+        search: `${firstName} ${lastName}`,
+        state: state,
+        include_ratings: true
+      },
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json',
+        'Origin': 'https://pickleballbrackets.com',
+        'Referer': 'https://pickleballbrackets.com/'
+      },
+      timeout: 10000
+    });
+
+    if (response.data && response.data.length > 0) {
+      const player = response.data.find(p => 
+        p.firstName.toLowerCase() === firstName.toLowerCase() && 
+        p.lastName.toLowerCase() === lastName.toLowerCase() &&
+        p.state === state
+      ) || response.data[0];
+
+      if (player && player.duprRating) {
+        return {
+          success: true,
+          firstName: player.firstName,
+          lastName: player.lastName,
+          state: player.state || state,
+          duprRating: player.duprRating,
+          doublesReliability: player.duprReliability || 85,
+          playerId: player.id,
+          city: player.city,
+          source: 'pickleball_brackets'
+        };
+      }
+    }
+
+    return { success: false, error: 'Player not found in PickleballBrackets.com' };
+  } catch (error) {
+    console.error('PickleballBrackets.com error:', error.message);
+    return { success: false, error: 'PickleballBrackets.com unavailable' };
+  }
+}
+
+// TournamentSoftware API integration
+async function searchTournamentSoftware(firstName, lastName, state) {
+  try {
+    const searchUrl = 'https://api.tournamentsoftware.com/pickleball/search';
+    
+    const response = await axios.get(searchUrl, {
+      params: {
+        name: `${firstName} ${lastName}`,
+        state: state,
+        include_ratings: true
+      },
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json',
+        'Origin': 'https://tournamentsoftware.com',
+        'Referer': 'https://tournamentsoftware.com/'
+      },
+      timeout: 10000
+    });
+
+    if (response.data && response.data.players && response.data.players.length > 0) {
+      const player = response.data.players.find(p => 
+        p.firstName.toLowerCase() === firstName.toLowerCase() && 
+        p.lastName.toLowerCase() === lastName.toLowerCase() &&
+        p.state === state
+      ) || response.data.players[0];
+
+      if (player && player.duprRating) {
+        return {
+          success: true,
+          firstName: player.firstName,
+          lastName: player.lastName,
+          state: player.state || state,
+          duprRating: player.duprRating,
+          doublesReliability: player.duprReliability || 85,
+          playerId: player.id,
+          country: player.country,
+          source: 'tournament_software'
+        };
+      }
+    }
+
+    return { success: false, error: 'Player not found in TournamentSoftware' };
+  } catch (error) {
+    console.error('TournamentSoftware error:', error.message);
+    return { success: false, error: 'TournamentSoftware unavailable' };
+  }
+}
+
+// Direct DUPR GraphQL attempt (with better headers)
+async function searchDUPRDirect(firstName, lastName, state) {
+  try {
     const graphqlQuery = {
       query: `
-        query SearchPlayers($query: String!, $state: String, $limit: Int) {
-          searchPlayers(query: $query, state: $state, limit: $limit) {
+        query PlayerSearch($query: String!, $state: String) {
+          playerSearch(query: $query, state: $state) {
             id
             firstName
             lastName
@@ -1645,155 +1904,46 @@ async function searchDUPR(firstName, lastName, state = 'GA') {
             doublesReliability
             gender
             age
-            club {
-              name
-            }
           }
         }
       `,
       variables: {
         query: `${firstName} ${lastName}`,
-        state: state,
-        limit: 10
+        state: state
       }
     };
 
-    const response = await axios.post('https://www.dupr.com/graphql', graphqlQuery, {
+    const response = await axios.post('https://www.dupr.com/api/graphql', graphqlQuery, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'application/json',
         'Content-Type': 'application/json',
         'Origin': 'https://www.dupr.com',
-        'Referer': 'https://www.dupr.com/'
+        'Referer': 'https://www.dupr.com/',
+        'X-Requested-With': 'XMLHttpRequest'
       },
-      timeout: 15000
+      timeout: 10000
     });
 
-    if (response.data && response.data.data && response.data.data.searchPlayers && response.data.data.searchPlayers.length > 0) {
-      // Find the best match
-      const players = response.data.data.searchPlayers;
-      const player = players.find(p => 
-        p.firstName.toLowerCase() === firstName.toLowerCase() && 
-        p.lastName.toLowerCase() === lastName.toLowerCase() &&
-        p.state === state
-      ) || players.find(p => 
-        p.firstName.toLowerCase() === firstName.toLowerCase() && 
-        p.lastName.toLowerCase() === lastName.toLowerCase()
-      ) || players[0];
-
-      if (player) {
-        return {
-          success: true,
-          firstName: player.firstName,
-          lastName: player.lastName,
-          state: player.state || state,
-          duprRating: player.rating,
-          doublesReliability: player.doublesReliability || 85,
-          playerId: player.id,
-          city: player.city,
-          club: player.club?.name,
-          gender: player.gender,
-          age: player.age,
-          source: 'dupr_graphql'
-        };
-      }
+    if (response.data && response.data.data && response.data.data.playerSearch && response.data.data.playerSearch.length > 0) {
+      const player = response.data.data.playerSearch[0];
+      return {
+        success: true,
+        firstName: player.firstName,
+        lastName: player.lastName,
+        state: player.state || state,
+        duprRating: player.rating,
+        doublesReliability: player.doublesReliability || 85,
+        playerId: player.id,
+        city: player.city,
+        source: 'dupr_direct'
+      };
     }
 
-    // Method 2: Try direct player profile URL extraction
-    const profileUrl = `https://www.dupr.com/players/${firstName.toLowerCase()}-${lastName.toLowerCase()}-${state.toLowerCase()}`;
-    const profileResponse = await axios.get(profileUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br'
-      },
-      timeout: 15000
-    });
-
-    // Extract data from the HTML using regex patterns
-    const html = profileResponse.data;
-    
-    // Look for JSON data embedded in the page
-    const jsonDataRegex = /window\.__INITIAL_STATE__\s*=\s*({.+?});/;
-    const jsonMatch = html.match(jsonDataRegex);
-    
-    if (jsonMatch) {
-      try {
-        const pageData = JSON.parse(jsonMatch[1]);
-        if (pageData.player) {
-          const player = pageData.player;
-          return {
-            success: true,
-            firstName: player.firstName,
-            lastName: player.lastName,
-            state: player.state || state,
-            duprRating: player.rating,
-            doublesReliability: player.doublesReliability || 85,
-            playerId: player.id,
-            city: player.city,
-            club: player.club?.name,
-            source: 'dupr_profile'
-          };
-        }
-      } catch (parseError) {
-        console.error('Failed to parse player data from profile page:', parseError);
-      }
-    }
-
-    // Method 3: Extract data using regex patterns from HTML
-    const ratingRegex = /"rating":\s*([0-9.]+)/;
-    const nameRegex = /"firstName":\s*"([^"]+).*?"lastName":\s*"([^"]+)"/;
-    const stateRegex = /"state":\s*"([^"]+)"/;
-    const reliabilityRegex = /"doublesReliability":\s*(\d+)/;
-
-    const ratingMatch = html.match(ratingRegex);
-    const nameMatch = html.match(nameRegex);
-    const stateMatch = html.match(stateRegex);
-    const reliabilityMatch = html.match(reliabilityRegex);
-
-    if (ratingMatch && nameMatch) {
-      const [, rating] = ratingMatch;
-      const [, first, last] = nameMatch;
-      const playerState = stateMatch ? stateMatch[1] : state;
-      const reliability = reliabilityMatch ? reliabilityMatch[1] : 85;
-
-      // Verify this matches our search
-      if (first.toLowerCase() === firstName.toLowerCase() && 
-          last.toLowerCase() === lastName.toLowerCase()) {
-        
-        return {
-          success: true,
-          firstName: first,
-          lastName: last,
-          state: playerState,
-          duprRating: parseFloat(rating),
-          doublesReliability: parseInt(reliability),
-          source: 'dupr_html_extract'
-        };
-      }
-    }
-
-    return {
-      success: false,
-      error: `Player ${firstName} ${lastName} not found in DUPR database for ${state}`,
-      firstName,
-      lastName,
-      state,
-      suggestion: 'Please verify the player name and state are correct, and that the player has a DUPR profile.'
-    };
-
+    return { success: false, error: 'Player not found in direct DUPR search' };
   } catch (error) {
-    console.error('Error searching DUPR:', error.message);
-    
-    return {
-      success: false,
-      error: `Unable to fetch DUPR data: ${error.message}. DUPR may be restricting access or the player may not exist.`,
-      firstName,
-      lastName,
-      state,
-      suggestion: 'For guaranteed access to DUPR data, consider applying for DUPR\'s official API access at https://www.dupr.com/developers'
-    };
+    console.error('Direct DUPR error:', error.message);
+    return { success: false, error: 'Direct DUPR API unavailable' };
   }
 }
 
