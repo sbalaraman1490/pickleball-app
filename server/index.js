@@ -1626,6 +1626,60 @@ app.post('/api/paddles/refresh', authenticateToken, requireAdmin, async (req, re
   }
 });
 
+// ========== DUPR RATING LOOKUP API ==========
+
+// Search DUPR rating for a single player
+async function searchDUPR(firstName, lastName, state = 'GA') {
+  try {
+    // Note: DUPR doesn't have a public API. This is a mock implementation.
+    // In production, you would need to:
+    // 1. Contact DUPR for API access
+    // 2. Or use web scraping (not recommended)
+    // 3. Or use a third-party service that has DUPR integration
+    
+    // For demo purposes, return mock data
+    const mockRatings = {
+      'John Smith': { rating: 4.2, reliability: 85 },
+      'Jane Doe': { rating: 3.8, reliability: 92 },
+      'Mike Johnson': { rating: 4.5, reliability: 88 },
+      'Sarah Wilson': { rating: 3.5, reliability: 78 }
+    };
+    
+    const fullName = `${firstName} ${lastName}`;
+    const mockData = mockRatings[fullName];
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    if (mockData) {
+      return {
+        success: true,
+        firstName,
+        lastName,
+        state,
+        duprRating: mockData.rating,
+        doublesReliability: mockData.reliability
+      };
+    } else {
+      // Return random data for demo
+      return {
+        success: true,
+        firstName,
+        lastName,
+        state,
+        duprRating: (Math.random() * 2 + 3).toFixed(1), // Random between 3.0-5.0
+        doublesReliability: Math.floor(Math.random() * 30 + 70) // Random between 70-100
+      };
+    }
+  } catch (error) {
+    console.error('Error searching DUPR:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+}
+
 // Upload Excel file and process DUPR lookups
 app.post('/api/dupr/upload', upload.single('excelFile'), async (req, res) => {
   try {
