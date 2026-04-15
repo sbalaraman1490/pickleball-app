@@ -19,6 +19,33 @@ function LandingPage() {
         </h1>
       </section>
 
+      {/* Top Navigation Menu */}
+      <nav className="top-navigation">
+        <div className="nav-links">
+          <Link to="/rules" className="nav-link">
+            <BookOpen size={18} />
+            <span>Rules</span>
+          </Link>
+          <Link to="/feed" className="nav-link">
+            <MessageSquare size={18} />
+            <span>Feed</span>
+          </Link>
+          <Link to="/paddles" className="nav-link">
+            <ShoppingBag size={18} />
+            <span>Paddles</span>
+          </Link>
+          <Link to="/dupr" className="nav-link">
+            <span>DUPR Lookup</span>
+          </Link>
+          <Link to="/login" className="nav-link login-link">
+            <span>Login</span>
+          </Link>
+          <Link to="/signup" className="nav-link signup-link">
+            <span>Sign Up</span>
+          </Link>
+        </div>
+      </nav>
+
       {/* Goals & Support Section */}
       <section className="content-section">
         <div className="content-grid">
@@ -152,16 +179,8 @@ function LandingPage() {
         </button>
       </section>
 
-      {/* Footer Links */}
+      {/* Footer */}
       <footer className="landing-footer">
-        <div className="footer-links">
-          <Link to="/rules">Rules</Link>
-          <Link to="/feed">Feed</Link>
-          <Link to="/paddles">Paddles</Link>
-          <Link to="/dupr">DUPR Lookup</Link>
-          <Link to="/login">Login</Link>
-          <Link to="/signup">Sign Up</Link>
-        </div>
         <p className="footer-copyright">© 2026 Dinkans Pickleball Club</p>
       </footer>
     </div>
