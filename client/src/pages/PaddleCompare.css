@@ -1,10 +1,11 @@
 .compare-panel {
-  background: white;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
   border-radius: var(--radius-md, 14px);
-  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0,0,0,0.1));
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   padding: 24px;
   margin-bottom: 28px;
-  border: 2px solid var(--primary, #2563eb);
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
 .compare-panel-header {

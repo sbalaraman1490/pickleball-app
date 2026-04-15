@@ -48,8 +48,9 @@
 
 .feed-filter {
   padding: 10px 20px;
-  border: 2px solid var(--gray-200, #e2e8f0);
-  background: white;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
   border-radius: 25px;
   font-size: 0.9rem;
   font-weight: 500;
@@ -71,16 +72,18 @@
 
 /* Feed Post Card */
 .feed-post-card {
-  background: white;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
   border-radius: var(--radius-md, 14px);
-  box-shadow: var(--shadow, 0 1px 3px rgba(0,0,0,0.1));
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   padding: 24px;
-  border: 1px solid var(--gray-100, #f1f5f9);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   transition: all 0.2s;
 }
 
 .feed-post-card:hover {
-  box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0,0,0,0.1));
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
 /* Post Header */
@@ -192,9 +195,11 @@
   gap: 16px;
   margin-top: 16px;
   padding: 16px;
-  background: var(--gray-50, #f8fafc);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(10px);
   border-radius: 12px;
   flex-wrap: wrap;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .feed-stat {

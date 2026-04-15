@@ -23,7 +23,7 @@ function PublicLayout({ children }) {
       <header className="public-header">
         <div className="public-header-content">
           <Link to="/" className="public-logo">
-            <span className="logo-icon">🏓</span>
+            <img src="/logo.jpeg" alt="Dinkans" className="public-logo-img" />
             <span className="logo-text">Dinkans</span>
           </Link>
           
@@ -70,7 +70,7 @@ function PublicLayout({ children }) {
       <footer className="public-footer">
         <div className="public-footer-content">
           <div className="footer-brand">
-            <span className="logo-icon">🏓</span>
+            <img src="/logo.jpeg" alt="Dinkans" className="footer-logo-img" />
             <span>Dinkans</span>
           </div>
           <p className="footer-tagline">Elevating Play, Building Community</p>
