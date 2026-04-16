@@ -17,42 +17,6 @@ const AltaPerformance = () => {
     teams: [
       {
         rank: 1,
-        name: "DINKANS TEAM 1 (Eldo Joseph)",
-        captain: "ELDO JOSEPH",
-        weeklyResults: [
-          { week: 1, gamesWon: 8, gamesPlayed: 2 },
-          { week: 2, gamesWon: 11, gamesPlayed: 4 },
-          { week: 3, gamesWon: 2, gamesPlayed: 1 },
-          { week: 4, gamesWon: 10, gamesPlayed: 4 },
-          { week: 5, gamesWon: 9, gamesPlayed: 1 },
-          { week: 6, gamesWon: 7, gamesPlayed: 2 },
-          { week: 7, bye: true }
-        ],
-        totalGames: 47,
-        maxGames: 72,
-        winPercentage: 65.278,
-        pointsPercentage: 57.073
-      },
-      {
-        rank: 2,
-        name: "DINKANS TEAM 2 (Fenie Thomas)",
-        captain: "FENIE THOMAS",
-        weeklyResults: [
-          { week: 1, gamesWon: 12, gamesPlayed: 4 },
-          { week: 2, gamesWon: 6, gamesPlayed: 2 },
-          { week: 3, gamesWon: 10, gamesPlayed: 3 },
-          { week: 4, gamesWon: 3, gamesPlayed: 2 },
-          { week: 5, gamesWon: 3, gamesPlayed: 3 },
-          { week: 6, gamesWon: 10, gamesPlayed: 4 },
-          { week: 7, bye: true }
-        ],
-        totalGames: 44,
-        maxGames: 72,
-        winPercentage: 61.111,
-        pointsPercentage: 56.843
-      },
-      {
-        rank: 3,
         name: "FOWLER PARK PICKLEBALL (PANDARATHODI)",
         captain: "PANDARATHODI",
         weeklyResults: [
@@ -68,6 +32,42 @@ const AltaPerformance = () => {
         maxGames: 72,
         winPercentage: 61.111,
         pointsPercentage: 56.843
+      },
+      {
+        rank: 2,
+        name: "FOWLER PARK PICKLEBALL (THOMAS)",
+        captain: "THOMAS",
+        weeklyResults: [
+          { week: 1, gamesWon: 4, gamesPlayed: 3 },
+          { week: 2, gamesWon: 6, gamesPlayed: 1 },
+          { week: 3, gamesWon: 12, gamesPlayed: 4 },
+          { week: 4, gamesWon: 9, gamesPlayed: 1 },
+          { week: 5, gamesWon: 10, gamesPlayed: 4 },
+          { week: 6, gamesWon: 5, gamesPlayed: 3 },
+          { week: 7, bye: true }
+        ],
+        totalGames: 46,
+        maxGames: 72,
+        winPercentage: 63.889,
+        pointsPercentage: 55.549
+      },
+      {
+        rank: 3,
+        name: "MIDWAY PARK (JOSEPH)",
+        captain: "JOSEPH",
+        weeklyResults: [
+          { week: 1, gamesWon: 8, gamesPlayed: 2 },
+          { week: 2, gamesWon: 11, gamesPlayed: 4 },
+          { week: 3, gamesWon: 2, gamesPlayed: 1 },
+          { week: 4, gamesWon: 10, gamesPlayed: 4 },
+          { week: 5, gamesWon: 9, gamesPlayed: 1 },
+          { week: 6, gamesWon: 7, gamesPlayed: 2 },
+          { week: 7, bye: true }
+        ],
+        totalGames: 47,
+        maxGames: 72,
+        winPercentage: 65.278,
+        pointsPercentage: 57.073
       },
       {
         rank: 4,
