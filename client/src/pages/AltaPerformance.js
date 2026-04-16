@@ -53,21 +53,21 @@ const AltaPerformance = () => {
       },
       {
         rank: 3,
-        name: "FOWLER PARK PICKLEBALL (THOMAS)",
-        captain: "THOMAS",
+        name: "FOWLER PARK PICKLEBALL (PANDARATHODI)",
+        captain: "PANDARATHODI",
         weeklyResults: [
-          { week: 1, gamesWon: 4, gamesPlayed: 3 },
-          { week: 2, gamesWon: 6, gamesPlayed: 1 },
-          { week: 3, gamesWon: 12, gamesPlayed: 4 },
-          { week: 4, gamesWon: 9, gamesPlayed: 1 },
-          { week: 5, gamesWon: 10, gamesPlayed: 4 },
-          { week: 6, gamesWon: 5, gamesPlayed: 3 },
+          { week: 1, gamesWon: 12, gamesPlayed: 4 },
+          { week: 2, gamesWon: 6, gamesPlayed: 2 },
+          { week: 3, gamesWon: 10, gamesPlayed: 3 },
+          { week: 4, gamesWon: 3, gamesPlayed: 2 },
+          { week: 5, gamesWon: 3, gamesPlayed: 3 },
+          { week: 6, gamesWon: 10, gamesPlayed: 4 },
           { week: 7, bye: true }
         ],
-        totalGames: 46,
+        totalGames: 44,
         maxGames: 72,
-        winPercentage: 63.889,
-        pointsPercentage: 55.549
+        winPercentage: 61.111,
+        pointsPercentage: 56.843
       },
       {
         rank: 4,
