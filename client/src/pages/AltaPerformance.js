@@ -16,7 +16,7 @@ const AltaPerformance = () => {
     weeks: 7,
     teams: [
       {
-        rank: 3,
+        rank: 1,
         name: "MIDWAY PARK (JOSEPH)",
         captain: "JOSEPH",
         weeklyResults: [
@@ -52,7 +52,7 @@ const AltaPerformance = () => {
         pointsPercentage: 55.549
       },
       {
-        rank: 1,
+        rank: 3,
         name: "FOWLER PARK PICKLEBALL (PANDARATHODI)",
         captain: "PANDARATHODI",
         weeklyResults: [
