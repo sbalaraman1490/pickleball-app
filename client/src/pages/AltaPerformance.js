@@ -16,22 +16,22 @@ const AltaPerformance = () => {
     weeks: 7,
     teams: [
       {
-        rank: 1,
-        name: "FOWLER PARK PICKLEBALL (PANDARATHODI)",
-        captain: "PANDARATHODI",
+        rank: 3,
+        name: "MIDWAY PARK (JOSEPH)",
+        captain: "JOSEPH",
         weeklyResults: [
-          { week: 1, gamesWon: 12, gamesPlayed: 4 },
-          { week: 2, gamesWon: 6, gamesPlayed: 2 },
-          { week: 3, gamesWon: 10, gamesPlayed: 3 },
-          { week: 4, gamesWon: 3, gamesPlayed: 2 },
-          { week: 5, gamesWon: 3, gamesPlayed: 3 },
-          { week: 6, gamesWon: 10, gamesPlayed: 4 },
+          { week: 1, gamesWon: 8, gamesPlayed: 2 },
+          { week: 2, gamesWon: 11, gamesPlayed: 4 },
+          { week: 3, gamesWon: 2, gamesPlayed: 1 },
+          { week: 4, gamesWon: 10, gamesPlayed: 4 },
+          { week: 5, gamesWon: 9, gamesPlayed: 1 },
+          { week: 6, gamesWon: 7, gamesPlayed: 2 },
           { week: 7, bye: true }
         ],
-        totalGames: 44,
+        totalGames: 47,
         maxGames: 72,
-        winPercentage: 61.111,
-        pointsPercentage: 56.843
+        winPercentage: 65.278,
+        pointsPercentage: 57.073
       },
       {
         rank: 2,
@@ -52,22 +52,22 @@ const AltaPerformance = () => {
         pointsPercentage: 55.549
       },
       {
-        rank: 3,
-        name: "MIDWAY PARK (JOSEPH)",
-        captain: "JOSEPH",
+        rank: 1,
+        name: "FOWLER PARK PICKLEBALL (PANDARATHODI)",
+        captain: "PANDARATHODI",
         weeklyResults: [
-          { week: 1, gamesWon: 8, gamesPlayed: 2 },
-          { week: 2, gamesWon: 11, gamesPlayed: 4 },
-          { week: 3, gamesWon: 2, gamesPlayed: 1 },
-          { week: 4, gamesWon: 10, gamesPlayed: 4 },
-          { week: 5, gamesWon: 9, gamesPlayed: 1 },
-          { week: 6, gamesWon: 7, gamesPlayed: 2 },
+          { week: 1, gamesWon: 12, gamesPlayed: 4 },
+          { week: 2, gamesWon: 6, gamesPlayed: 2 },
+          { week: 3, gamesWon: 10, gamesPlayed: 3 },
+          { week: 4, gamesWon: 3, gamesPlayed: 2 },
+          { week: 5, gamesWon: 3, gamesPlayed: 3 },
+          { week: 6, gamesWon: 10, gamesPlayed: 4 },
           { week: 7, bye: true }
         ],
-        totalGames: 47,
+        totalGames: 44,
         maxGames: 72,
-        winPercentage: 65.278,
-        pointsPercentage: 57.073
+        winPercentage: 61.111,
+        pointsPercentage: 56.843
       },
       {
         rank: 4,
