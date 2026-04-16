@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { BookOpen, MessageSquare, ShoppingBag, LogIn, UserPlus, Home, Trophy } from 'lucide-react';
+import { BookOpen, MessageSquare, ShoppingBag, LogIn, UserPlus, Home, Trophy, Bot } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import './PublicLayout.css';
 
@@ -13,7 +13,8 @@ function PublicLayout({ children }) {
     { path: '/rules', label: 'Rules & Guide', icon: BookOpen },
     { path: '/feed', label: 'Community Feed', icon: MessageSquare },
     { path: '/paddles', label: 'Paddle Compare', icon: ShoppingBag },
-    { path: '/alta', label: 'ALTA Performance', icon: Trophy }
+    { path: '/alta', label: 'ALTA Performance', icon: Trophy },
+    { path: '/chat', label: 'AI Chat', icon: Bot }
   ];
 
   const isActive = (path) => location.pathname === path;

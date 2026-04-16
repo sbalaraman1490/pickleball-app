@@ -2511,6 +2511,87 @@ app.post('/api/dupr/search', async (req, res) => {
   }
 });
 
+// Ollama Chat API Endpoint
+app.post('/api/chat', async (req, res) => {
+  try {
+    const { message, conversationHistory = [] } = req.body;
+    const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+    const model = process.env.OLLAMA_MODEL || 'llama3';
+
+    if (!message) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    // Format conversation history for Ollama
+    const messages = [
+      {
+        role: 'system',
+        content: 'You are a helpful AI assistant for Dinkans, a pickleball community platform. Be friendly, helpful, and knowledgeable about pickleball rules, equipment, and community management. Keep responses concise and relevant to the user\'s query.'
+      },
+      ...conversationHistory,
+      {
+        role: 'user',
+        content: message
+      }
+    ];
+
+    // Call Ollama API
+    const response = await fetch(`${ollamaUrl}/api/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: messages,
+        stream: false
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Ollama API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const assistantMessage = data.message?.content || 'Sorry, I couldn\'t generate a response.';
+
+    res.json({
+      response: assistantMessage,
+      model: model
+    });
+  } catch (error) {
+    console.error('Error in chat endpoint:', error);
+    if (error.code === 'ECONNREFUSED') {
+      res.status(503).json({ 
+        error: 'Ollama is not running. Please start Ollama on your machine.',
+        hint: 'Install and run: ollama serve'
+      });
+    } else {
+      res.status(500).json({ error: 'Failed to process chat request' });
+    }
+  }
+});
+
+// Check if Ollama is available
+app.get('/api/chat/status', async (req, res) => {
+  try {
+    const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
+    const response = await fetch(`${ollamaUrl}/api/tags`);
+    
+    if (response.ok) {
+      const data = await response.json();
+      res.json({ 
+        available: true, 
+        models: data.models || [] 
+      });
+    } else {
+      res.json({ available: false });
+    }
+  } catch (error) {
+    res.json({ available: false });
+  }
+});
+
 // Serve React app for all other routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/build/index.html'));

@@ -12,6 +12,7 @@ import Feed from './pages/Feed';
 import PaddleCompare from './pages/PaddleCompare';
 import DuprLookup from './pages/DuprLookup';
 import AltaPerformance from './pages/AltaPerformance';
+import Chat from './pages/Chat';
 import AppLayout from './AppLayout';
 import PublicLayout from './PublicLayout';
 import './App.css';
@@ -34,6 +35,7 @@ function App() {
           <Route path="/paddles" element={<PublicLayout><PaddleCompare /></PublicLayout>} />
           <Route path="/dupr" element={<PublicLayout><DuprLookup /></PublicLayout>} />
           <Route path="/alta" element={<PublicLayout><AltaPerformance /></PublicLayout>} />
+          <Route path="/chat" element={<PublicLayout><Chat /></PublicLayout>} />
           
           {/* Protected App Routes */}
           <Route path="/app/*" element={
