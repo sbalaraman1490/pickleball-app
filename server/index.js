@@ -32,6 +32,14 @@ const SCRAPERAPI_KEY = process.env.SCRAPERAPI_KEY;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-3.5-turbo';
 
+// Debug: Log all environment variables (without exposing sensitive values)
+console.log('=== Environment Variables Debug ===');
+console.log('OPENAI_API_KEY exists:', !!OPENAI_API_KEY);
+console.log('OPENAI_API_KEY length:', OPENAI_API_KEY?.length);
+console.log('OPENAI_MODEL:', OPENAI_MODEL);
+console.log('All env keys starting with OPENAI:', Object.keys(process.env).filter(k => k.includes('OPENAI')));
+console.log('=== End Debug ===');
+
 // Function to fetch paddles from external sources
 async function fetchPaddlesFromExternal() {
   const paddles = [];
