@@ -17,44 +17,8 @@ const AltaPerformance = () => {
     teams: [
       {
         rank: 1,
-        name: "DINKANS TEAM 1",
-        captain: "CAPTAIN",
-        weeklyResults: [
-          { week: 1, gamesWon: 12, gamesPlayed: 4 },
-          { week: 2, gamesWon: 10, gamesPlayed: 2 },
-          { week: 3, gamesWon: 11, gamesPlayed: 3 },
-          { week: 4, gamesWon: 9, gamesPlayed: 2 },
-          { week: 5, gamesWon: 10, gamesPlayed: 3 },
-          { week: 6, gamesWon: 8, gamesPlayed: 2 },
-          { week: 7, bye: true }
-        ],
-        totalGames: 60,
-        maxGames: 72,
-        winPercentage: 83.333,
-        pointsPercentage: 72.500
-      },
-      {
-        rank: 2,
-        name: "DINKANS TEAM 2",
-        captain: "CO-CAPTAIN",
-        weeklyResults: [
-          { week: 1, gamesWon: 10, gamesPlayed: 3 },
-          { week: 2, gamesWon: 8, gamesPlayed: 2 },
-          { week: 3, gamesWon: 9, gamesPlayed: 3 },
-          { week: 4, gamesWon: 11, gamesPlayed: 4 },
-          { week: 5, gamesWon: 7, gamesPlayed: 2 },
-          { week: 6, gamesWon: 9, gamesPlayed: 3 },
-          { week: 7, bye: true }
-        ],
-        totalGames: 54,
-        maxGames: 72,
-        winPercentage: 75.000,
-        pointsPercentage: 65.800
-      },
-      {
-        rank: 3,
-        name: "MIDWAY PARK",
-        captain: "JOSEPH",
+        name: "DINKANS TEAM 1 (Eldo Joseph)",
+        captain: "ELDO JOSEPH",
         weeklyResults: [
           { week: 1, gamesWon: 8, gamesPlayed: 2 },
           { week: 2, gamesWon: 11, gamesPlayed: 4 },
@@ -70,8 +34,26 @@ const AltaPerformance = () => {
         pointsPercentage: 57.073
       },
       {
-        rank: 4,
-        name: "FOWLER PARK PICKLEBALL",
+        rank: 2,
+        name: "DINKANS TEAM 2 (Fenie Thomas)",
+        captain: "FENIE THOMAS",
+        weeklyResults: [
+          { week: 1, gamesWon: 12, gamesPlayed: 4 },
+          { week: 2, gamesWon: 6, gamesPlayed: 2 },
+          { week: 3, gamesWon: 10, gamesPlayed: 3 },
+          { week: 4, gamesWon: 3, gamesPlayed: 2 },
+          { week: 5, gamesWon: 3, gamesPlayed: 3 },
+          { week: 6, gamesWon: 10, gamesPlayed: 4 },
+          { week: 7, bye: true }
+        ],
+        totalGames: 44,
+        maxGames: 72,
+        winPercentage: 61.111,
+        pointsPercentage: 56.843
+      },
+      {
+        rank: 3,
+        name: "FOWLER PARK PICKLEBALL (THOMAS)",
         captain: "THOMAS",
         weeklyResults: [
           { week: 1, gamesWon: 4, gamesPlayed: 3 },
@@ -86,6 +68,24 @@ const AltaPerformance = () => {
         maxGames: 72,
         winPercentage: 63.889,
         pointsPercentage: 55.549
+      },
+      {
+        rank: 4,
+        name: "PARKSTONE (LANCASTER)",
+        captain: "LANCASTER",
+        weeklyResults: [
+          { week: 1, gamesWon: 0, gamesPlayed: 1 },
+          { week: 2, gamesWon: 1, gamesPlayed: 3 },
+          { week: 3, gamesWon: 0, gamesPlayed: 2 },
+          { week: 4, gamesWon: 2, gamesPlayed: 3 },
+          { week: 5, gamesWon: 2, gamesPlayed: 2 },
+          { week: 6, gamesWon: 2, gamesPlayed: 1 },
+          { week: 7, bye: true }
+        ],
+        totalGames: 7,
+        maxGames: 72,
+        winPercentage: 9.722,
+        pointsPercentage: 28.219
       }
     ]
   };
