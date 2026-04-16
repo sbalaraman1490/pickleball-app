@@ -2586,6 +2586,10 @@ app.post('/api/chat', async (req, res) => {
 
 // Check if OpenAI API is configured
 app.get('/api/chat/status', async (req, res) => {
+  console.log('OPENAI_API_KEY set:', !!OPENAI_API_KEY);
+  console.log('OPENAI_API_KEY length:', OPENAI_API_KEY?.length);
+  console.log('OPENAI_MODEL:', OPENAI_MODEL);
+  
   if (OPENAI_API_KEY) {
     res.json({
       available: true,
@@ -2599,6 +2603,16 @@ app.get('/api/chat/status', async (req, res) => {
       hint: 'Please set the OPENAI_API_KEY environment variable'
     });
   }
+});
+
+// Debug endpoint to check environment variables (without exposing sensitive data)
+app.get('/api/debug/env', (req, res) => {
+  res.json({
+    openai_key_set: !!OPENAI_API_KEY,
+    openai_key_length: OPENAI_API_KEY?.length || 0,
+    openai_model: OPENAI_MODEL,
+    node_env: process.env.NODE_ENV
+  });
 });
 
 // Serve React app for all other routes
