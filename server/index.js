@@ -28,6 +28,10 @@ const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
 const AMAZON_ASSOCIATE_TAG = process.env.AMAZON_ASSOCIATE_TAG;
 const SCRAPERAPI_KEY = process.env.SCRAPERAPI_KEY;
 
+// OpenAI API Configuration for Chat
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-3.5-turbo';
+
 // Function to fetch paddles from external sources
 async function fetchPaddlesFromExternal() {
   const paddles = [];
@@ -2511,18 +2515,23 @@ app.post('/api/dupr/search', async (req, res) => {
   }
 });
 
-// Ollama Chat API Endpoint
+// OpenAI Chat API Endpoint
 app.post('/api/chat', async (req, res) => {
   try {
     const { message, conversationHistory = [] } = req.body;
-    const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-    const model = process.env.OLLAMA_MODEL || 'llama3';
 
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    // Format conversation history for Ollama
+    if (!OPENAI_API_KEY) {
+      return res.status(503).json({
+        error: 'OpenAI API key is not configured',
+        hint: 'Please set the OPENAI_API_KEY environment variable'
+      });
+    }
+
+    // Format conversation history for OpenAI
     const messages = [
       {
         role: 'system',
@@ -2535,36 +2544,39 @@ app.post('/api/chat', async (req, res) => {
       }
     ];
 
-    // Call Ollama API
-    const response = await fetch(`${ollamaUrl}/api/chat`, {
+    // Call OpenAI API
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: model,
+        model: OPENAI_MODEL,
         messages: messages,
-        stream: false
+        max_tokens: 500,
+        temperature: 0.7
       })
     });
 
     if (!response.ok) {
-      throw new Error(`Ollama API error: ${response.statusText}`);
+      const errorData = await response.json();
+      throw new Error(`OpenAI API error: ${errorData.error?.message || response.statusText}`);
     }
 
     const data = await response.json();
-    const assistantMessage = data.message?.content || 'Sorry, I couldn\'t generate a response.';
+    const assistantMessage = data.choices[0]?.message?.content || 'Sorry, I couldn\'t generate a response.';
 
     res.json({
       response: assistantMessage,
-      model: model
+      model: OPENAI_MODEL
     });
   } catch (error) {
     console.error('Error in chat endpoint:', error);
-    if (error.code === 'ECONNREFUSED') {
-      res.status(503).json({ 
-        error: 'Ollama is not running. Please start Ollama on your machine.',
-        hint: 'Install and run: ollama serve'
+    if (error.message.includes('API key')) {
+      res.status(503).json({
+        error: 'Invalid OpenAI API key',
+        hint: 'Please check your OPENAI_API_KEY environment variable'
       });
     } else {
       res.status(500).json({ error: 'Failed to process chat request' });
@@ -2572,23 +2584,20 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-// Check if Ollama is available
+// Check if OpenAI API is configured
 app.get('/api/chat/status', async (req, res) => {
-  try {
-    const ollamaUrl = process.env.OLLAMA_URL || 'http://localhost:11434';
-    const response = await fetch(`${ollamaUrl}/api/tags`);
-    
-    if (response.ok) {
-      const data = await response.json();
-      res.json({ 
-        available: true, 
-        models: data.models || [] 
-      });
-    } else {
-      res.json({ available: false });
-    }
-  } catch (error) {
-    res.json({ available: false });
+  if (OPENAI_API_KEY) {
+    res.json({
+      available: true,
+      provider: 'OpenAI',
+      model: OPENAI_MODEL
+    });
+  } else {
+    res.json({
+      available: false,
+      provider: 'OpenAI',
+      hint: 'Please set the OPENAI_API_KEY environment variable'
+    });
   }
 });
 

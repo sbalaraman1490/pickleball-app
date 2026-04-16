@@ -115,6 +115,15 @@
   font-size: 0.85rem;
 }
 
+.ollama-warning a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.ollama-warning a:hover {
+  color: #1d4ed8;
+}
+
 .models-info {
   padding: 8px 24px;
   background: rgba(248, 250, 252, 0.8);

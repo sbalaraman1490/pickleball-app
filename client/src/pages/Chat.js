@@ -12,7 +12,6 @@ const Chat = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isOllamaAvailable, setIsOllamaAvailable] = useState(true);
-  const [models, setModels] = useState([]);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -30,23 +29,22 @@ const Chat = () => {
       const response = await fetch('/api/chat/status');
       const data = await response.json();
       setIsOllamaAvailable(data.available);
-      setModels(data.models || []);
       
       if (!data.available) {
         setMessages([
           {
             role: 'assistant',
-            content: '⚠️ Ollama is not running. Please start Ollama on your machine by running `ollama serve` in a terminal. Once Ollama is running, refresh this page.'
+            content: `⚠️ ${data.provider} is not configured. ${data.hint || 'Please configure your API key.'}`
           }
         ]);
       }
     } catch (error) {
-      console.error('Error checking Ollama status:', error);
+      console.error('Error checking chat status:', error);
       setIsOllamaAvailable(false);
       setMessages([
         {
           role: 'assistant',
-          content: '⚠️ Unable to connect to Ollama. Please ensure Ollama is installed and running on your machine.'
+          content: '⚠️ Unable to connect to chat service. Please check your configuration.'
         }
       ]);
     }
@@ -130,7 +128,7 @@ const Chat = () => {
             <div>
               <h1>Dinkans AI Assistant</h1>
               <p className="chat-subtitle">
-                {isOllamaAvailable ? 'Powered by Ollama' : 'Ollama not available'}
+                {isOllamaAvailable ? 'Powered by OpenAI' : 'OpenAI not configured'}
               </p>
             </div>
           </div>
@@ -148,16 +146,10 @@ const Chat = () => {
           <div className="ollama-warning">
             <AlertCircle size={20} />
             <div>
-              <strong>Ollama is not running</strong>
-              <p>Please start Ollama on your machine: <code>ollama serve</code></p>
-              <p>Make sure you have a model installed: <code>ollama pull llama3</code></p>
+              <strong>OpenAI API not configured</strong>
+              <p>Please set the <code>OPENAI_API_KEY</code> environment variable in your server configuration.</p>
+              <p>Get your API key from: <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">platform.openai.com</a></p>
             </div>
-          </div>
-        )}
-
-        {models.length > 0 && (
-          <div className="models-info">
-            <small>Available models: {models.map(m => m.name).join(', ')}</small>
           </div>
         )}
 
