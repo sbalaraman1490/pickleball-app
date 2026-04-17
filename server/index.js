@@ -28,16 +28,16 @@ const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
 const AMAZON_ASSOCIATE_TAG = process.env.AMAZON_ASSOCIATE_TAG;
 const SCRAPERAPI_KEY = process.env.SCRAPERAPI_KEY;
 
-// OpenAI API Configuration for Chat
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-3.5-turbo';
+// xAI API Configuration for Chat (Grok)
+const XAI_API_KEY = process.env.XAI_API_KEY;
+const XAI_MODEL = process.env.XAI_MODEL || 'grok-beta';
 
 // Debug: Log all environment variables (without exposing sensitive values)
 console.log('=== Environment Variables Debug ===');
-console.log('OPENAI_API_KEY exists:', !!OPENAI_API_KEY);
-console.log('OPENAI_API_KEY length:', OPENAI_API_KEY?.length);
-console.log('OPENAI_MODEL:', OPENAI_MODEL);
-console.log('All env keys starting with OPENAI:', Object.keys(process.env).filter(k => k.includes('OPENAI')));
+console.log('XAI_API_KEY exists:', !!XAI_API_KEY);
+console.log('XAI_API_KEY length:', XAI_API_KEY?.length);
+console.log('XAI_MODEL:', XAI_MODEL);
+console.log('All env keys starting with XAI:', Object.keys(process.env).filter(k => k.includes('XAI')));
 console.log('=== End Debug ===');
 
 // Function to fetch paddles from external sources
@@ -2523,7 +2523,7 @@ app.post('/api/dupr/search', async (req, res) => {
   }
 });
 
-// OpenAI Chat API Endpoint
+// xAI Chat API Endpoint (Grok)
 app.post('/api/chat', async (req, res) => {
   try {
     const { message, conversationHistory = [] } = req.body;
@@ -2532,14 +2532,14 @@ app.post('/api/chat', async (req, res) => {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    if (!OPENAI_API_KEY) {
+    if (!XAI_API_KEY) {
       return res.status(503).json({
-        error: 'OpenAI API key is not configured',
-        hint: 'Please set the OPENAI_API_KEY environment variable'
+        error: 'xAI API key is not configured',
+        hint: 'Please set the XAI_API_KEY environment variable'
       });
     }
 
-    // Format conversation history for OpenAI
+    // Format conversation history for xAI
     const messages = [
       {
         role: 'system',
@@ -2552,15 +2552,15 @@ app.post('/api/chat', async (req, res) => {
       }
     ];
 
-    // Call OpenAI API
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Call xAI API
+    const response = await fetch('https://api.x.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${OPENAI_API_KEY}`
+        'Authorization': `Bearer ${XAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: OPENAI_MODEL,
+        model: XAI_MODEL,
         messages: messages,
         max_tokens: 500,
         temperature: 0.7
@@ -2569,7 +2569,7 @@ app.post('/api/chat', async (req, res) => {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(`OpenAI API error: ${errorData.error?.message || response.statusText}`);
+      throw new Error(`xAI API error: ${errorData.error?.message || response.statusText}`);
     }
 
     const data = await response.json();
@@ -2577,14 +2577,14 @@ app.post('/api/chat', async (req, res) => {
 
     res.json({
       response: assistantMessage,
-      model: OPENAI_MODEL
+      model: XAI_MODEL
     });
   } catch (error) {
     console.error('Error in chat endpoint:', error);
     if (error.message.includes('API key')) {
       res.status(503).json({
-        error: 'Invalid OpenAI API key',
-        hint: 'Please check your OPENAI_API_KEY environment variable'
+        error: 'Invalid xAI API key',
+        hint: 'Please check your XAI_API_KEY environment variable'
       });
     } else {
       res.status(500).json({ error: 'Failed to process chat request' });
@@ -2592,23 +2592,23 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-// Check if OpenAI API is configured
+// Check if xAI API is configured
 app.get('/api/chat/status', async (req, res) => {
-  console.log('OPENAI_API_KEY set:', !!OPENAI_API_KEY);
-  console.log('OPENAI_API_KEY length:', OPENAI_API_KEY?.length);
-  console.log('OPENAI_MODEL:', OPENAI_MODEL);
-  
-  if (OPENAI_API_KEY) {
+  console.log('XAI_API_KEY set:', !!XAI_API_KEY);
+  console.log('XAI_API_KEY length:', XAI_API_KEY?.length);
+  console.log('XAI_MODEL:', XAI_MODEL);
+
+  if (XAI_API_KEY) {
     res.json({
       available: true,
-      provider: 'OpenAI',
-      model: OPENAI_MODEL
+      provider: 'Grok AI (xAI)',
+      model: XAI_MODEL
     });
   } else {
     res.json({
       available: false,
-      provider: 'OpenAI',
-      hint: 'Please set the OPENAI_API_KEY environment variable'
+      provider: 'Grok AI (xAI)',
+      hint: 'Please set the XAI_API_KEY environment variable'
     });
   }
 });
@@ -2616,9 +2616,9 @@ app.get('/api/chat/status', async (req, res) => {
 // Debug endpoint to check environment variables (without exposing sensitive data)
 app.get('/api/debug/env', (req, res) => {
   res.json({
-    openai_key_set: !!OPENAI_API_KEY,
-    openai_key_length: OPENAI_API_KEY?.length || 0,
-    openai_model: OPENAI_MODEL,
+    xai_key_set: !!XAI_API_KEY,
+    xai_key_length: XAI_API_KEY?.length || 0,
+    xai_model: XAI_MODEL,
     node_env: process.env.NODE_ENV
   });
 });

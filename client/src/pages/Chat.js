@@ -29,7 +29,7 @@ const Chat = () => {
       const response = await fetch('/api/chat/status');
       const data = await response.json();
       setIsOllamaAvailable(data.available);
-      
+
       if (!data.available) {
         setMessages([
           {
@@ -128,7 +128,7 @@ const Chat = () => {
             <div>
               <h1>Dinkans AI Assistant</h1>
               <p className="chat-subtitle">
-                {isOllamaAvailable ? 'Powered by OpenAI' : 'OpenAI not configured'}
+                {isOllamaAvailable ? 'Powered by Grok AI (xAI)' : 'Grok AI not configured'}
               </p>
             </div>
           </div>
@@ -146,9 +146,9 @@ const Chat = () => {
           <div className="ollama-warning">
             <AlertCircle size={20} />
             <div>
-              <strong>OpenAI API not configured</strong>
-              <p>Please set the <code>OPENAI_API_KEY</code> environment variable in your server configuration.</p>
-              <p>Get your API key from: <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">platform.openai.com</a></p>
+              <strong>Grok AI (xAI) not configured</strong>
+              <p>Please set the <code>XAI_API_KEY</code> environment variable in your server configuration.</p>
+              <p>Get your API key from: <a href="https://console.x.ai/" target="_blank" rel="noopener noreferrer">console.x.ai</a></p>
             </div>
           </div>
         )}
