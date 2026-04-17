@@ -2568,8 +2568,15 @@ app.post('/api/chat', async (req, res) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`xAI API error: ${errorData.error?.message || response.statusText}`);
+      const errorText = await response.text();
+      console.error('xAI API Error Response:', errorText);
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {
+        errorData = { error: errorText };
+      }
+      throw new Error(`xAI API error: ${errorData.error?.message || errorData.error || response.statusText}`);
     }
 
     const data = await response.json();
