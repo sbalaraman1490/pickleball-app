@@ -30,7 +30,7 @@ const SCRAPERAPI_KEY = process.env.SCRAPERAPI_KEY;
 
 // xAI API Configuration for Chat (Grok)
 const XAI_API_KEY = process.env.XAI_API_KEY;
-const XAI_MODEL = process.env.XAI_MODEL || 'grok-beta';
+const XAI_MODEL = process.env.XAI_MODEL || 'grok-2';
 
 // Debug: Log all environment variables (without exposing sensitive values)
 console.log('=== Environment Variables Debug ===');
