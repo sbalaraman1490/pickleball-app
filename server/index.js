@@ -30,7 +30,7 @@ const SCRAPERAPI_KEY = process.env.SCRAPERAPI_KEY;
 
 // xAI API Configuration for Chat (Grok)
 const XAI_API_KEY = process.env.XAI_API_KEY;
-const XAI_MODEL = process.env.XAI_MODEL || 'grok-2';
+const XAI_MODEL = process.env.XAI_MODEL || 'grok-2-mini';
 
 // Debug: Log all environment variables (without exposing sensitive values)
 console.log('=== Environment Variables Debug ===');
@@ -2617,6 +2617,32 @@ app.get('/api/chat/status', async (req, res) => {
       provider: 'Grok AI (xAI)',
       hint: 'Please set the XAI_API_KEY environment variable'
     });
+  }
+});
+
+// List available xAI models
+app.get('/api/chat/models', async (req, res) => {
+  try {
+    if (!XAI_API_KEY) {
+      return res.json({ error: 'XAI_API_KEY not configured' });
+    }
+
+    const response = await fetch('https://api.x.ai/v1/models', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${XAI_API_KEY}`
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      res.json({ models: data });
+    } else {
+      const errorText = await response.text();
+      res.json({ error: 'Failed to fetch models', details: errorText });
+    }
+  } catch (error) {
+    res.json({ error: error.message });
   }
 });
 
