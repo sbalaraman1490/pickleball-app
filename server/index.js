@@ -471,6 +471,34 @@ db.serialize(() => {
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (uploaded_by) REFERENCES users(id)
   )`);
+
+  // Custom menu items table
+  db.run(`CREATE TABLE IF NOT EXISTS custom_menu_items (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    icon TEXT,
+    route TEXT NOT NULL,
+    order_index INTEGER DEFAULT 0,
+    content_type TEXT DEFAULT 'static',
+    created_by TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES users(id)
+  )`);
+
+  // Page content table
+  db.run(`CREATE TABLE IF NOT EXISTS page_content (
+    id TEXT PRIMARY KEY,
+    menu_item_id TEXT NOT NULL,
+    template_type TEXT NOT NULL,
+    title TEXT,
+    content TEXT,
+    sections TEXT,
+    created_by TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (menu_item_id) REFERENCES custom_menu_items(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES users(id)
+  )`);
 });
 
 // ========== AUTHENTICATION MIDDLEWARE & API ==========
@@ -2766,6 +2794,308 @@ app.delete('/api/gallery/:id', authenticateToken, (req, res) => {
 
       res.json({ success: true, message: 'Image deleted successfully' });
     });
+  });
+});
+
+// ========== CUSTOM MENU SYSTEM APIs ==========
+
+// Get all custom menu items (admin only)
+app.get('/api/admin/menu-items', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+
+  // Check if user is admin
+  db.get('SELECT role FROM users WHERE id = ?', [userId], (err, user) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    db.all(
+      'SELECT id, title, icon, route, order_index, content_type, created_at FROM custom_menu_items ORDER BY order_index ASC',
+      [],
+      (err, items) => {
+        if (err) {
+          return res.status(500).json({ error: 'Failed to fetch menu items' });
+        }
+
+        res.json({ items });
+      }
+    );
+  });
+});
+
+// Create custom menu item (admin only)
+app.post('/api/admin/menu-items', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+
+  // Check if user is admin
+  db.get('SELECT role FROM users WHERE id = ?', [userId], (err, user) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const { title, icon, route, content_type, order_index } = req.body;
+
+    if (!title || !route) {
+      return res.status(400).json({ error: 'Title and route are required' });
+    }
+
+    const menuId = uuidv4();
+
+    db.run(
+      'INSERT INTO custom_menu_items (id, title, icon, route, order_index, content_type, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [menuId, title, icon, route, order_index || 0, content_type || 'static', userId],
+      function(err) {
+        if (err) {
+          return res.status(500).json({ error: 'Failed to create menu item' });
+        }
+
+        res.json({
+          success: true,
+          message: 'Menu item created successfully',
+          item: {
+            id: menuId,
+            title,
+            icon,
+            route,
+            order_index: order_index || 0,
+            content_type: content_type || 'static'
+          }
+        });
+      }
+    );
+  });
+});
+
+// Update custom menu item (admin only)
+app.put('/api/admin/menu-items/:id', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const menuId = req.params.id;
+
+  // Check if user is admin
+  db.get('SELECT role FROM users WHERE id = ?', [userId], (err, user) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const { title, icon, route, order_index, content_type } = req.body;
+
+    db.run(
+      'UPDATE custom_menu_items SET title = ?, icon = ?, route = ?, order_index = ?, content_type = ? WHERE id = ?',
+      [title, icon, route, order_index, content_type, menuId],
+      function(err) {
+        if (err) {
+          return res.status(500).json({ error: 'Failed to update menu item' });
+        }
+
+        if (this.changes === 0) {
+          return res.status(404).json({ error: 'Menu item not found' });
+        }
+
+        res.json({ success: true, message: 'Menu item updated successfully' });
+      }
+    );
+  });
+});
+
+// Delete custom menu item (admin only)
+app.delete('/api/admin/menu-items/:id', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const menuId = req.params.id;
+
+  // Check if user is admin
+  db.get('SELECT role FROM users WHERE id = ?', [userId], (err, user) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    db.run('DELETE FROM custom_menu_items WHERE id = ?', [menuId], function(err) {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to delete menu item' });
+      }
+
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Menu item not found' });
+      }
+
+      res.json({ success: true, message: 'Menu item deleted successfully' });
+    });
+  });
+});
+
+// Get page content for a menu item (admin only)
+app.get('/api/admin/page-content/:menuId', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const menuId = req.params.id;
+
+  // Check if user is admin
+  db.get('SELECT role FROM users WHERE id = ?', [userId], (err, user) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    db.get(
+      'SELECT * FROM page_content WHERE menu_item_id = ?',
+      [menuId],
+      (err, content) => {
+        if (err) {
+          return res.status(500).json({ error: 'Failed to fetch page content' });
+        }
+
+        res.json({ content: content || null });
+      }
+    );
+  });
+});
+
+// Create/update page content (admin only)
+app.post('/api/admin/page-content', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+
+  // Check if user is admin
+  db.get('SELECT role FROM users WHERE id = ?', [userId], (err, user) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const { menu_item_id, template_type, title, content, sections } = req.body;
+
+    if (!menu_item_id || !template_type) {
+      return res.status(400).json({ error: 'Menu item ID and template type are required' });
+    }
+
+    // Check if content already exists
+    db.get(
+      'SELECT id FROM page_content WHERE menu_item_id = ?',
+      [menu_item_id],
+      (err, existingContent) => {
+        if (err) {
+          return res.status(500).json({ error: 'Database error' });
+        }
+
+        const sectionsJson = sections ? JSON.stringify(sections) : null;
+
+        if (existingContent) {
+          // Update existing content
+          db.run(
+            'UPDATE page_content SET template_type = ?, title = ?, content = ?, sections = ?, updated_at = CURRENT_TIMESTAMP WHERE menu_item_id = ?',
+            [template_type, title, content, sectionsJson, menu_item_id],
+            function(err) {
+              if (err) {
+                return res.status(500).json({ error: 'Failed to update page content' });
+              }
+
+              res.json({ success: true, message: 'Page content updated successfully' });
+            }
+          );
+        } else {
+          // Create new content
+          const contentId = uuidv4();
+          db.run(
+            'INSERT INTO page_content (id, menu_item_id, template_type, title, content, sections, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [contentId, menu_item_id, template_type, title, content, sectionsJson, userId],
+            function(err) {
+              if (err) {
+                return res.status(500).json({ error: 'Failed to create page content' });
+              }
+
+              res.json({ success: true, message: 'Page content created successfully' });
+            }
+          );
+        }
+      }
+    );
+  });
+});
+
+// Get custom menu items for sidebar (admin only)
+app.get('/api/admin/menu-sidebar', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+
+  // Check if user is admin
+  db.get('SELECT role FROM users WHERE id = ?', [userId], (err, user) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    db.all(
+      'SELECT id, title, icon, route FROM custom_menu_items ORDER BY order_index ASC',
+      [],
+      (err, items) => {
+        if (err) {
+          return res.status(500).json({ error: 'Failed to fetch menu items' });
+        }
+
+        res.json({ items });
+      }
+    );
+  });
+});
+
+// Get page content for rendering (admin only)
+app.get('/api/admin/page/:route', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const route = req.params.route;
+
+  // Check if user is admin
+  db.get('SELECT role FROM users WHERE id = ?', [userId], (err, user) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    db.get(
+      `SELECT pc.*, cmi.title as menu_title FROM page_content pc 
+       JOIN custom_menu_items cmi ON pc.menu_item_id = cmi.id 
+       WHERE cmi.route = ?`,
+      [route],
+      (err, content) => {
+        if (err) {
+          return res.status(500).json({ error: 'Failed to fetch page content' });
+        }
+
+        if (!content) {
+          return res.status(404).json({ error: 'Page not found' });
+        }
+
+        const parsedContent = {
+          ...content,
+          sections: content.sections ? JSON.parse(content.sections) : null
+        };
+
+        res.json({ content: parsedContent });
+      }
+    );
   });
 });
 

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, NavLink, Link } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Users, Receipt, Scale, LogOut, Shield, User, BookOpen, MessageSquare, ShoppingBag, Image as ImageIcon } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Receipt, Scale, LogOut, Shield, User, BookOpen, MessageSquare, ShoppingBag, Image as ImageIcon, Layout } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
+import { apiFetch } from './utils/api';
 import Dashboard from './pages/Dashboard';
 import Games from './pages/Games';
 import Players from './pages/Players';
@@ -13,14 +14,50 @@ import Rules from './pages/Rules';
 import Feed from './pages/Feed';
 import PaddleCompare from './pages/PaddleCompare';
 import Gallery from './pages/Gallery';
+import DynamicPage from './pages/DynamicPage';
 import './App.css';
 
 function AppLayout() {
   const { logout, isAdmin, user } = useAuth();
-  
+  const [customMenuItems, setCustomMenuItems] = useState([]);
+
+  useEffect(() => {
+    if (isAdmin()) {
+      fetchCustomMenuItems();
+    }
+  }, [isAdmin]);
+
+  const fetchCustomMenuItems = async () => {
+    try {
+      const data = await apiFetch('/api/admin/menu-sidebar');
+      setCustomMenuItems(data.items || []);
+    } catch (error) {
+      console.error('Error fetching custom menu items:', error);
+    }
+  };
+
   const handleLogout = () => {
     logout();
     window.location.href = '/';
+  };
+
+  const getIconComponent = (iconName) => {
+    // Map icon names to components
+    const iconMap = {
+      LayoutDashboard,
+      Settings,
+      FileText: () => <span>📄</span>,
+      Calendar,
+      Users,
+      Chart: () => <span>📊</span>,
+      Database: () => <span>🗄️</span>,
+      Globe: () => <span>🌍</span>,
+      Mail: () => <span>✉️</span>,
+      Folder: () => <span>📁</span>,
+      Star: () => <span>⭐</span>,
+      Heart: () => <span>❤️</span>
+    };
+    return iconMap[iconName] || Layout;
   };
 
   return (
@@ -107,6 +144,17 @@ function AppLayout() {
               <span>Gallery</span>
             </NavLink>
           </li>
+          {customMenuItems.map(item => {
+            const IconComponent = getIconComponent(item.icon);
+            return (
+              <li key={item.id}>
+                <NavLink to={`/app/${item.route}`} className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+                  <IconComponent size={20} />
+                  <span>{item.title}</span>
+                </NavLink>
+              </li>
+            );
+          })}
           <li className="nav-divider"></li>
           <li>
             <NavLink to="/app/profile" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
@@ -140,6 +188,7 @@ function AppLayout() {
           <Route path="/feed" element={<Feed />} />
           <Route path="/paddles" element={<PaddleCompare />} />
           <Route path="/gallery" element={<Gallery />} />
+          <Route path="/:route" element={<DynamicPage />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>

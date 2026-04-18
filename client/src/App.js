@@ -15,6 +15,9 @@ import AltaPerformance from './pages/AltaPerformance';
 import Chat from './pages/Chat';
 import Gallery from './pages/Gallery';
 import AdminGallery from './pages/AdminGallery';
+import MenuBuilder from './pages/MenuBuilder';
+import PageBuilder from './pages/PageBuilder';
+import DynamicPage from './pages/DynamicPage';
 import AppLayout from './AppLayout';
 import PublicLayout from './PublicLayout';
 import './App.css';
@@ -51,6 +54,27 @@ function App() {
           <Route path="/admin-gallery" element={
             <ProtectedRoute>
               <AdminGallery />
+            </ProtectedRoute>
+          } />
+
+          {/* Menu Builder Route (Admin Only) */}
+          <Route path="/app/menu-builder" element={
+            <ProtectedRoute>
+              <MenuBuilder />
+            </ProtectedRoute>
+          } />
+
+          {/* Page Builder Route (Admin Only) */}
+          <Route path="/app/page-builder" element={
+            <ProtectedRoute>
+              <PageBuilder />
+            </ProtectedRoute>
+          } />
+
+          {/* Dynamic Page Route (Admin Only) */}
+          <Route path="/app/:route" element={
+            <ProtectedRoute>
+              <DynamicPage />
             </ProtectedRoute>
           } />
         

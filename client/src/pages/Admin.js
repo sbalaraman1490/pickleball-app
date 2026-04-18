@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Users, Receipt, Check, X, Shield, User, Plus, Image as ImageIcon } from 'lucide-react';
+import { Users, Receipt, Check, X, Shield, User, Plus, Image as ImageIcon, LayoutDashboard } from 'lucide-react';
 import { apiFetch } from '../utils/api';
 import './Admin.css';
 
@@ -139,12 +139,20 @@ function Admin() {
           <h1>Admin Dashboard</h1>
           <p>Manage users and approve expenses</p>
         </div>
-        <button
-          className="btn btn-secondary"
-          onClick={() => navigate('/admin-gallery')}
-        >
-          <ImageIcon size={18} /> Manage Gallery
-        </button>
+        <div className="header-actions">
+          <button
+            className="btn btn-secondary"
+            onClick={() => navigate('/app/menu-builder')}
+          >
+            <LayoutDashboard size={18} /> Menu Builder
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => navigate('/admin-gallery')}
+          >
+            <ImageIcon size={18} /> Manage Gallery
+          </button>
+        </div>
       </div>
 
       {message && <div className="admin-message">{message}</div>}
