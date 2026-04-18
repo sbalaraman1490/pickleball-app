@@ -1,12 +1,95 @@
 import React, { useState } from 'react';
-import { BookOpen, Target, Users, Scale, AlertCircle, CheckCircle, HelpCircle } from 'lucide-react';
+import { BookOpen, Target, Users, Scale, AlertCircle, CheckCircle, HelpCircle, Play } from 'lucide-react';
 import './Rules.css';
+
+function PickleballAnimation() {
+  const [step, setStep] = useState(0);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setStep((prev) => (prev + 1) % 6);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const steps = [
+    'Server prepares to serve',
+    'Serve to diagonal court',
+    'Return must bounce',
+    'Serve team lets it bounce',
+    'Volley at the net',
+    'Point scored!'
+  ];
+
+  return (
+    <div className="pickleball-animation">
+      <div className="animation-status">{steps[step]}</div>
+      <div className="court-container">
+        <div className="court">
+          {/* Court lines */}
+          <div className="court-line baseline top"></div>
+          <div className="court-line baseline bottom"></div>
+          <div className="court-line sideline left"></div>
+          <div className="court-line sideline right"></div>
+          <div className="court-line center-line"></div>
+          <div className="court-line kitchen-line top"></div>
+          <div className="court-line kitchen-line bottom"></div>
+          <div className="net"></div>
+          
+          {/* Kitchen zones */}
+          <div className="kitchen-zone top">
+            <span className="kitchen-label">KITCHEN</span>
+          </div>
+          <div className="kitchen-zone bottom">
+            <span className="kitchen-label">KITCHEN</span>
+          </div>
+          
+          {/* Players */}
+          <div className={`player server ${step >= 0 ? 'active' : ''}`}>
+            <div className="player-paddle"></div>
+            <span className="player-label">Server</span>
+          </div>
+          <div className={`player receiver ${step >= 2 ? 'active' : ''}`}>
+            <div className="player-paddle"></div>
+            <span className="player-label">Receiver</span>
+          </div>
+          <div className={`player partner ${step >= 4 ? 'active' : ''}`}>
+            <div className="player-paddle"></div>
+            <span className="player-label">Partner</span>
+          </div>
+          
+          {/* Ball */}
+          <div className={`ball step-${step}`}></div>
+          
+          {/* Bounce markers */}
+          <div className={`bounce bounce-1 ${step === 2 ? 'show' : ''}`}></div>
+          <div className={`bounce bounce-2 ${step === 3 ? 'show' : ''}`}></div>
+        </div>
+      </div>
+      <div className="animation-legend">
+        <div className="legend-item">
+          <span className="legend-color server-color"></span>
+          <span>Serving Team</span>
+        </div>
+        <div className="legend-item">
+          <span className="legend-color receiver-color"></span>
+          <span>Receiving Team</span>
+        </div>
+        <div className="legend-item">
+          <span className="legend-color kitchen-color"></span>
+          <span>Non-Volley Zone</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function Rules() {
   const [activeSection, setActiveSection] = useState('basics');
 
   const sections = [
     { id: 'basics', label: 'What is Pickleball?', icon: HelpCircle },
+    { id: 'howtoplay', label: 'How to Play', icon: Play },
     { id: 'rules', label: 'Basic Rules', icon: BookOpen },
     { id: 'scoring', label: 'Scoring', icon: Target },
     { id: 'serving', label: 'Serving', icon: Users },
@@ -15,6 +98,15 @@ function Rules() {
   ];
 
   const content = {
+    howtoplay: {
+      title: 'How to Play Pickleball',
+      content: [
+        {
+          heading: 'Watch the Animation',
+          text: 'See how a typical pickleball rally works. The animation shows the serve, the double bounce rule, and volleys at the net.'
+        }
+      ]
+    },
     basics: {
       title: 'What is Pickleball?',
       content: [
@@ -220,6 +312,8 @@ function Rules() {
         <div className="rules-content">
           <div className="rules-card">
             <h2>{currentContent.title}</h2>
+            
+            {activeSection === 'howtoplay' && <PickleballAnimation />}
             
             {currentContent.content.map((item, index) => (
               <div key={index} className="rule-section">
