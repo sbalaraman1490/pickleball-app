@@ -73,7 +73,8 @@ function MenuBuilder() {
       fetchMenuItems();
     } catch (error) {
       console.error('Error saving menu item:', error);
-      setMessage('Failed to save menu item');
+      const errorMessage = error.message || 'Failed to save menu item';
+      setMessage(`Error: ${errorMessage}`);
     }
   };
 
