@@ -334,7 +334,18 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+
+// Body parser error handler
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    console.error('Bad JSON request:', err.message);
+    console.error('Request path:', req.path);
+    console.error('Content-Type:', req.headers['content-type']);
+    return res.status(400).json({ error: 'Invalid JSON in request body' });
+  }
+  next();
+});
 
 // Configure multer for file uploads
 const upload = multer({
