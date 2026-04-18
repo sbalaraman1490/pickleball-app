@@ -5,6 +5,7 @@ import { apiFetch } from '../utils/api';
 import './Gallery.css';
 
 function Gallery() {
+  const navigate = useNavigate();
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(null);

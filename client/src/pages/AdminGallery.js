@@ -5,6 +5,7 @@ import { apiFetch } from '../utils/api';
 import './AdminGallery.css';
 
 function AdminGallery() {
+  const navigate = useNavigate();
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
