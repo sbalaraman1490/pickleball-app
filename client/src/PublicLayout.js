@@ -1,9 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { BookOpen, MessageSquare, ShoppingBag, LogIn, UserPlus, Home, Trophy, Bot, Image as ImageIcon } from 'lucide-react';
+import { BookOpen, MessageSquare, ShoppingBag, LogIn, UserPlus, Home, Trophy, Bot, Image as ImageIcon, LayoutDashboard, Settings, FileText, Calendar, Users, BarChart3, Database, Globe, Mail, Folder, Star, Heart } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import { apiFetch } from './utils/api';
 import './PublicLayout.css';
+
+// Icon mapping for dynamic menu items
+const iconMap = {
+  LayoutDashboard,
+  Settings,
+  FileText,
+  Calendar,
+  Users,
+  Chart: BarChart3,
+  Database,
+  Globe,
+  Mail,
+  Folder,
+  Star,
+  Heart,
+  BookOpen,
+  MessageSquare,
+  ShoppingBag,
+  Trophy,
+  Bot,
+  ImageIcon
+};
 
 function PublicLayout({ children }) {
   const location = useLocation();
@@ -57,16 +79,19 @@ function PublicLayout({ children }) {
                 {link.label}
               </Link>
             ))}
-            {publicMenuItems.map(item => (
-              <Link
-                key={item.id}
-                to={`/${item.route}`}
-                className={`public-nav-link ${isActive(`/${item.route}`) ? 'active' : ''}`}
-              >
-                <span>📄</span>
-                {item.title}
-              </Link>
-            ))}
+            {publicMenuItems.map(item => {
+              const MenuIcon = iconMap[item.icon] || FileText;
+              return (
+                <Link
+                  key={item.id}
+                  to={`/${item.route}`}
+                  className={`public-nav-link ${isActive(`/${item.route}`) ? 'active' : ''}`}
+                >
+                  <MenuIcon size={18} />
+                  {item.title}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="public-auth">

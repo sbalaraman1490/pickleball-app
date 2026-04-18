@@ -1,10 +1,51 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { BookOpen, MessageSquare, ShoppingBag, ArrowRight, Play, Trophy, Bot, Image as ImageIcon } from 'lucide-react';
+import { BookOpen, MessageSquare, ShoppingBag, ArrowRight, Play, Trophy, Bot, Image as ImageIcon, LayoutDashboard, Settings, FileText, Calendar, Users, BarChart3, Database, Globe, Mail, Folder, Star, Heart } from 'lucide-react';
+import { apiFetch } from '../utils/api';
 import './LandingPage.css';
+
+// Icon mapping for dynamic menu items
+const iconMap = {
+  LayoutDashboard,
+  Settings,
+  FileText,
+  Calendar,
+  Users,
+  Chart: BarChart3,
+  Database,
+  Globe,
+  Mail,
+  Folder,
+  Star,
+  Heart,
+  BookOpen,
+  MessageSquare,
+  ShoppingBag,
+  Trophy,
+  Bot,
+  ImageIcon
+};
 
 function LandingPage() {
   const navigate = useNavigate();
+  const [publicMenuItems, setPublicMenuItems] = useState([]);
+
+  useEffect(() => {
+    const fetchPublicMenuItems = async () => {
+      try {
+        const data = await apiFetch('/api/public/menu-items');
+        setPublicMenuItems(data.items || []);
+      } catch (error) {
+        console.error('Error fetching public menu items:', error);
+      }
+    };
+    fetchPublicMenuItems();
+  }, []);
+
+  const renderIcon = (iconName) => {
+    const Icon = iconMap[iconName] || FileText;
+    return <Icon size={18} />;
+  };
 
   return (
     <div className="landing-page">
@@ -49,6 +90,12 @@ function LandingPage() {
             <ImageIcon size={18} />
             <span>Gallery</span>
           </Link>
+          {publicMenuItems.map(item => (
+            <Link key={item.id} to={`/${item.route}`} className="nav-link">
+              {renderIcon(item.icon)}
+              <span>{item.title}</span>
+            </Link>
+          ))}
           <Link to="/login" className="nav-link login-link">
             <span>Login</span>
           </Link>
