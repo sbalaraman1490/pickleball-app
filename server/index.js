@@ -28,16 +28,16 @@ const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
 const AMAZON_ASSOCIATE_TAG = process.env.AMAZON_ASSOCIATE_TAG;
 const SCRAPERAPI_KEY = process.env.SCRAPERAPI_KEY;
 
-// xAI API Configuration for Chat (Grok)
-const XAI_API_KEY = process.env.XAI_API_KEY;
-const XAI_MODEL = process.env.XAI_MODEL || 'grok-2-mini';
+// Groq API Configuration for Chat
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+const GROQ_MODEL = process.env.GROQ_MODEL || 'llama3-70b-8192';
 
 // Debug: Log all environment variables (without exposing sensitive values)
 console.log('=== Environment Variables Debug ===');
-console.log('XAI_API_KEY exists:', !!XAI_API_KEY);
-console.log('XAI_API_KEY length:', XAI_API_KEY?.length);
-console.log('XAI_MODEL:', XAI_MODEL);
-console.log('All env keys starting with XAI:', Object.keys(process.env).filter(k => k.includes('XAI')));
+console.log('GROQ_API_KEY exists:', !!GROQ_API_KEY);
+console.log('GROQ_API_KEY length:', GROQ_API_KEY?.length);
+console.log('GROQ_MODEL:', GROQ_MODEL);
+console.log('All env keys starting with GROQ:', Object.keys(process.env).filter(k => k.includes('GROQ')));
 console.log('=== End Debug ===');
 
 // Function to fetch paddles from external sources
@@ -2523,7 +2523,7 @@ app.post('/api/dupr/search', async (req, res) => {
   }
 });
 
-// xAI Chat API Endpoint (Grok)
+// Groq Chat API Endpoint
 app.post('/api/chat', async (req, res) => {
   try {
     const { message, conversationHistory = [] } = req.body;
@@ -2532,14 +2532,14 @@ app.post('/api/chat', async (req, res) => {
       return res.status(400).json({ error: 'Message is required' });
     }
 
-    if (!XAI_API_KEY) {
+    if (!GROQ_API_KEY) {
       return res.status(503).json({
-        error: 'xAI API key is not configured',
-        hint: 'Please set the XAI_API_KEY environment variable'
+        error: 'Groq API key is not configured',
+        hint: 'Please set the GROQ_API_KEY environment variable'
       });
     }
 
-    // Format conversation history for xAI
+    // Format conversation history for Groq
     const messages = [
       {
         role: 'system',
@@ -2552,15 +2552,15 @@ app.post('/api/chat', async (req, res) => {
       }
     ];
 
-    // Call xAI API
-    const response = await fetch('https://api.x.ai/v1/chat/completions', {
+    // Call Groq API
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${XAI_API_KEY}`
+        'Authorization': `Bearer ${GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: XAI_MODEL,
+        model: GROQ_MODEL,
         messages: messages,
         max_tokens: 500,
         temperature: 0.7
@@ -2569,14 +2569,14 @@ app.post('/api/chat', async (req, res) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('xAI API Error Response:', errorText);
+      console.error('Groq API Error Response:', errorText);
       let errorData;
       try {
         errorData = JSON.parse(errorText);
       } catch (e) {
         errorData = { error: errorText };
       }
-      throw new Error(`xAI API error: ${errorData.error?.message || errorData.error || response.statusText}`);
+      throw new Error(`Groq API error: ${errorData.error?.message || errorData.error || response.statusText}`);
     }
 
     const data = await response.json();
@@ -2584,14 +2584,14 @@ app.post('/api/chat', async (req, res) => {
 
     res.json({
       response: assistantMessage,
-      model: XAI_MODEL
+      model: GROQ_MODEL
     });
   } catch (error) {
     console.error('Error in chat endpoint:', error);
     if (error.message.includes('API key')) {
       res.status(503).json({
-        error: 'Invalid xAI API key',
-        hint: 'Please check your XAI_API_KEY environment variable'
+        error: 'Invalid Groq API key',
+        hint: 'Please check your GROQ_API_KEY environment variable'
       });
     } else {
       res.status(500).json({ error: 'Failed to process chat request' });
@@ -2599,38 +2599,38 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
-// Check if xAI API is configured
+// Check if Groq API is configured
 app.get('/api/chat/status', async (req, res) => {
-  console.log('XAI_API_KEY set:', !!XAI_API_KEY);
-  console.log('XAI_API_KEY length:', XAI_API_KEY?.length);
-  console.log('XAI_MODEL:', XAI_MODEL);
+  console.log('GROQ_API_KEY set:', !!GROQ_API_KEY);
+  console.log('GROQ_API_KEY length:', GROQ_API_KEY?.length);
+  console.log('GROQ_MODEL:', GROQ_MODEL);
 
-  if (XAI_API_KEY) {
+  if (GROQ_API_KEY) {
     res.json({
       available: true,
-      provider: 'Grok AI (xAI)',
-      model: XAI_MODEL
+      provider: 'Groq',
+      model: GROQ_MODEL
     });
   } else {
     res.json({
       available: false,
-      provider: 'Grok AI (xAI)',
-      hint: 'Please set the XAI_API_KEY environment variable'
+      provider: 'Groq',
+      hint: 'Please set the GROQ_API_KEY environment variable'
     });
   }
 });
 
-// List available xAI models
+// List available Groq models
 app.get('/api/chat/models', async (req, res) => {
   try {
-    if (!XAI_API_KEY) {
-      return res.json({ error: 'XAI_API_KEY not configured' });
+    if (!GROQ_API_KEY) {
+      return res.json({ error: 'GROQ_API_KEY not configured' });
     }
 
-    const response = await fetch('https://api.x.ai/v1/models', {
+    const response = await fetch('https://api.groq.com/openai/v1/models', {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${XAI_API_KEY}`
+        'Authorization': `Bearer ${GROQ_API_KEY}`
       }
     });
 
@@ -2646,22 +2646,22 @@ app.get('/api/chat/models', async (req, res) => {
   }
 });
 
-// Simple test endpoint to check xAI API
+// Simple test endpoint to check Groq API
 app.get('/api/chat/test', async (req, res) => {
   res.json({
     message: 'API test endpoint working',
-    xai_key_configured: !!XAI_API_KEY,
-    xai_key_length: XAI_API_KEY?.length || 0,
-    current_model: XAI_MODEL
+    groq_key_configured: !!GROQ_API_KEY,
+    groq_key_length: GROQ_API_KEY?.length || 0,
+    current_model: GROQ_MODEL
   });
 });
 
 // Debug endpoint to check environment variables (without exposing sensitive data)
 app.get('/api/debug/env', (req, res) => {
   res.json({
-    xai_key_set: !!XAI_API_KEY,
-    xai_key_length: XAI_API_KEY?.length || 0,
-    xai_model: XAI_MODEL,
+    groq_key_set: !!GROQ_API_KEY,
+    groq_key_length: GROQ_API_KEY?.length || 0,
+    groq_model: GROQ_MODEL,
     node_env: process.env.NODE_ENV
   });
 });

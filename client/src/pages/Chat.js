@@ -128,7 +128,7 @@ const Chat = () => {
             <div>
               <h1>Dinkans AI Assistant</h1>
               <p className="chat-subtitle">
-                {isOllamaAvailable ? 'Powered by Grok AI (xAI)' : 'Grok AI not configured'}
+                {isOllamaAvailable ? 'Powered by Groq' : 'Groq not configured'}
               </p>
             </div>
           </div>
@@ -146,9 +146,9 @@ const Chat = () => {
           <div className="ollama-warning">
             <AlertCircle size={20} />
             <div>
-              <strong>Grok AI (xAI) not configured</strong>
-              <p>Please set the <code>XAI_API_KEY</code> environment variable in your server configuration.</p>
-              <p>Get your API key from: <a href="https://console.x.ai/" target="_blank" rel="noopener noreferrer">console.x.ai</a></p>
+              <strong>Groq not configured</strong>
+              <p>Please set the <code>GROQ_API_KEY</code> environment variable in your server configuration.</p>
+              <p>Get your free API key from: <a href="https://console.groq.com/" target="_blank" rel="noopener noreferrer">console.groq.com</a></p>
             </div>
           </div>
         )}
