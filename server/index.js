@@ -360,7 +360,21 @@ app.use(express.static(path.join(__dirname, '../client/build')));
 const DB_PATH = process.env.DATABASE_PATH || path.join(__dirname, 'pickleball.db');
 console.log('Database path:', DB_PATH);
 
-const db = new sqlite3.Database(DB_PATH);
+// Ensure database directory exists
+const dbDir = path.dirname(DB_PATH);
+if (!require('fs').existsSync(dbDir)) {
+  console.log('Creating database directory:', dbDir);
+  require('fs').mkdirSync(dbDir, { recursive: true });
+}
+
+let db;
+try {
+  db = new sqlite3.Database(DB_PATH);
+  console.log('Database connected successfully');
+} catch (error) {
+  console.error('Failed to connect to database:', error);
+  process.exit(1);
+}
 
 db.serialize(() => {
   // Players table
@@ -3158,6 +3172,18 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/build/index.html'));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`Health check available at: http://localhost:${PORT}/api/health`);
+});
+
+// Handle uncaught errors
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Rejection:', err);
+  process.exit(1);
 });
