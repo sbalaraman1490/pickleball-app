@@ -2646,6 +2646,16 @@ app.get('/api/chat/models', async (req, res) => {
   }
 });
 
+// Simple test endpoint to check xAI API
+app.get('/api/chat/test', async (req, res) => {
+  res.json({
+    message: 'API test endpoint working',
+    xai_key_configured: !!XAI_API_KEY,
+    xai_key_length: XAI_API_KEY?.length || 0,
+    current_model: XAI_MODEL
+  });
+});
+
 // Debug endpoint to check environment variables (without exposing sensitive data)
 app.get('/api/debug/env', (req, res) => {
   res.json({
