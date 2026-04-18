@@ -53,6 +53,7 @@ function MenuBuilder() {
     setMessage('');
 
     try {
+      console.log('Saving menu item:', formData);
       if (editingItem) {
         await apiFetch(`/api/admin/menu-items/${editingItem.id}`, {
           method: 'PUT',
@@ -73,6 +74,7 @@ function MenuBuilder() {
       fetchMenuItems();
     } catch (error) {
       console.error('Error saving menu item:', error);
+      console.error('Error details:', JSON.stringify(error));
       const errorMessage = error.message || 'Failed to save menu item';
       setMessage(`Error: ${errorMessage}`);
     }
