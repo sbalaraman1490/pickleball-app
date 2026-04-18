@@ -30,7 +30,7 @@ const SCRAPERAPI_KEY = process.env.SCRAPERAPI_KEY;
 
 // Groq API Configuration for Chat
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const GROQ_MODEL = process.env.GROQ_MODEL || 'llama3-70b-8192';
+const GROQ_MODEL = process.env.GROQ_MODEL || 'llama3-8b-8192';
 
 // Debug: Log all environment variables (without exposing sensitive values)
 console.log('=== Environment Variables Debug ===');
