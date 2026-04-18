@@ -540,6 +540,11 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
+// Health check endpoint for Railway
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // Register
 app.post('/api/auth/register', async (req, res) => {
   const { name, email, password, captchaToken } = req.body;
