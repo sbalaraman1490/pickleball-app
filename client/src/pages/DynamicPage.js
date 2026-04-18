@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Loader2, AlertCircle } from 'lucide-react';
 import { apiFetch } from '../utils/api';
 import './DynamicPage.css';
 
 function DynamicPage() {
   const { route } = useParams();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [content, setContent] = useState(null);
   const [error, setError] = useState(null);
@@ -38,8 +39,13 @@ function DynamicPage() {
   if (error || !content) {
     return (
       <div className="dynamic-page-error">
+        <AlertCircle size={48} />
         <h2>Page Not Found</h2>
-        <p>The requested page could not be found.</p>
+        <p>This custom page hasn't been created yet.</p>
+        <p>Please use the Menu Builder to create content for this page.</p>
+        <button onClick={() => navigate('/app/menu-builder')}>
+          Go to Menu Builder
+        </button>
       </div>
     );
   }

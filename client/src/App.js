@@ -70,13 +70,6 @@ function App() {
               <PageBuilder />
             </ProtectedRoute>
           } />
-
-          {/* Dynamic Page Route (Admin Only) */}
-          <Route path="/app/:route" element={
-            <ProtectedRoute>
-              <DynamicPage />
-            </ProtectedRoute>
-          } />
         
         {/* Redirect old routes to /app */}
         <Route path="/dashboard" element={<Navigate to="/app" replace />} />

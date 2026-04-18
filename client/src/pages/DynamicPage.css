@@ -30,6 +30,11 @@
   color: #64748b;
 }
 
+.dynamic-page-error svg {
+  color: #f59e0b;
+  margin-bottom: 24px;
+}
+
 .dynamic-page-error h2 {
   font-size: 24px;
   color: #1e293b;
@@ -38,6 +43,26 @@
 
 .dynamic-page-error p {
   font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.dynamic-page-error button {
+  display: inline-block;
+  margin-top: 24px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dynamic-page-error button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
 /* Text Template */
