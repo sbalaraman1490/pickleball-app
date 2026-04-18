@@ -9,6 +9,27 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  gap: 16px;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: white;
+  border: 1px solid rgba(226, 232, 240, 0.5);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #64748b;
+}
+
+.back-button:hover {
+  background: rgba(248, 250, 252, 0.8);
+  color: #1e293b;
 }
 
 .menu-builder-header h1 {

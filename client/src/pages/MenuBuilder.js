@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, ArrowUp, ArrowDown, Settings, LayoutDashboard } from 'lucide-react';
+import { Plus, Edit, Trash2, ArrowUp, ArrowDown, Settings, LayoutDashboard, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../utils/api';
 import './MenuBuilder.css';
 
 function MenuBuilder() {
+  const navigate = useNavigate();
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
@@ -147,12 +149,18 @@ function MenuBuilder() {
   return (
     <div className="menu-builder">
       <div className="menu-builder-header">
+        <button
+          className="back-button"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft size={20} /> Back
+        </button>
         <h1><LayoutDashboard size={28} /> Menu Builder</h1>
         <button
           className="add-button"
           onClick={() => {
             setEditingItem(null);
-            setFormData({ title: '', icon: '', route: '', content_type: 'static', order_index: 0 });
+            setFormData({ title: '', icon: '', route: '', content_type: 'static', visibility: 'admin', order_index: 0 });
             setShowModal(true);
           }}
         >
