@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Image as ImageIcon, Loader2, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../utils/api';
 import './Gallery.css';
 
@@ -34,6 +35,12 @@ function Gallery() {
   return (
     <div className="gallery-page">
       <div className="gallery-header">
+        <button
+          className="back-button"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft size={20} /> Back
+        </button>
         <h1><ImageIcon size={32} /> Photo Gallery</h1>
         <p>Capture the moments, cherish the memories</p>
       </div>

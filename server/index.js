@@ -480,6 +480,7 @@ db.serialize(() => {
     route TEXT NOT NULL,
     order_index INTEGER DEFAULT 0,
     content_type TEXT DEFAULT 'static',
+    visibility TEXT DEFAULT 'admin',
     created_by TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (created_by) REFERENCES users(id)
@@ -2814,7 +2815,7 @@ app.get('/api/admin/menu-items', authenticateToken, (req, res) => {
     }
 
     db.all(
-      'SELECT id, title, icon, route, order_index, content_type, created_at FROM custom_menu_items ORDER BY order_index ASC',
+      'SELECT id, title, icon, route, order_index, content_type, visibility, created_at FROM custom_menu_items ORDER BY order_index ASC',
       [],
       (err, items) => {
         if (err) {
@@ -2841,7 +2842,7 @@ app.post('/api/admin/menu-items', authenticateToken, (req, res) => {
       return res.status(403).json({ error: 'Admin access required' });
     }
 
-    const { title, icon, route, content_type, order_index } = req.body;
+    const { title, icon, route, content_type, order_index, visibility } = req.body;
 
     if (!title || !route) {
       return res.status(400).json({ error: 'Title and route are required' });
@@ -2850,8 +2851,8 @@ app.post('/api/admin/menu-items', authenticateToken, (req, res) => {
     const menuId = uuidv4();
 
     db.run(
-      'INSERT INTO custom_menu_items (id, title, icon, route, order_index, content_type, created_by) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [menuId, title, icon, route, order_index || 0, content_type || 'static', userId],
+      'INSERT INTO custom_menu_items (id, title, icon, route, order_index, content_type, visibility, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      [menuId, title, icon, route, order_index || 0, content_type || 'static', visibility || 'admin', userId],
       function(err) {
         if (err) {
           return res.status(500).json({ error: 'Failed to create menu item' });
@@ -2866,7 +2867,8 @@ app.post('/api/admin/menu-items', authenticateToken, (req, res) => {
             icon,
             route,
             order_index: order_index || 0,
-            content_type: content_type || 'static'
+            content_type: content_type || 'static',
+            visibility: visibility || 'admin'
           }
         });
       }
@@ -2889,11 +2891,11 @@ app.put('/api/admin/menu-items/:id', authenticateToken, (req, res) => {
       return res.status(403).json({ error: 'Admin access required' });
     }
 
-    const { title, icon, route, order_index, content_type } = req.body;
+    const { title, icon, route, order_index, content_type, visibility } = req.body;
 
     db.run(
-      'UPDATE custom_menu_items SET title = ?, icon = ?, route = ?, order_index = ?, content_type = ? WHERE id = ?',
-      [title, icon, route, order_index, content_type, menuId],
+      'UPDATE custom_menu_items SET title = ?, icon = ?, route = ?, order_index = ?, content_type = ?, visibility = ? WHERE id = ?',
+      [title, icon, route, order_index, content_type, visibility, menuId],
       function(err) {
         if (err) {
           return res.status(500).json({ error: 'Failed to update menu item' });
@@ -3057,6 +3059,49 @@ app.get('/api/admin/menu-sidebar', authenticateToken, (req, res) => {
       }
     );
   });
+});
+
+// Get public menu items (no authentication required)
+app.get('/api/public/menu-items', (req, res) => {
+  db.all(
+    "SELECT id, title, icon, route FROM custom_menu_items WHERE visibility = 'public' ORDER BY order_index ASC",
+    [],
+    (err, items) => {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to fetch menu items' });
+      }
+
+      res.json({ items });
+    }
+  );
+});
+
+// Get page content for rendering (public access for public pages)
+app.get('/api/public/page/:route', (req, res) => {
+  const route = req.params.route;
+
+  db.get(
+    `SELECT pc.*, cmi.title as menu_title, cmi.visibility FROM page_content pc
+     JOIN custom_menu_items cmi ON pc.menu_item_id = cmi.id
+     WHERE cmi.route = ? AND cmi.visibility = 'public'`,
+    [route],
+    (err, content) => {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to fetch page content' });
+      }
+
+      if (!content) {
+        return res.status(404).json({ error: 'Page not found' });
+      }
+
+      const parsedContent = {
+        ...content,
+        sections: content.sections ? JSON.parse(content.sections) : null
+      };
+
+      res.json({ content: parsedContent });
+    }
+  );
 });
 
 // Get page content for rendering (admin only)

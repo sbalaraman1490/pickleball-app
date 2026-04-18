@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Image as ImageIcon, Trash2, Plus, X, Loader2 } from 'lucide-react';
+import { Upload, Image as ImageIcon, Trash2, Plus, X, Loader2, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { apiFetch } from '../utils/api';
 import './AdminGallery.css';
 
@@ -72,6 +73,12 @@ function AdminGallery() {
   return (
     <div className="admin-gallery">
       <div className="admin-gallery-header">
+        <button
+          className="back-button"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft size={20} /> Back
+        </button>
         <h1><ImageIcon size={28} /> Gallery Management</h1>
         <button
           className="upload-button"

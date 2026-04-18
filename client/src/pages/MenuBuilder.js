@@ -14,6 +14,7 @@ function MenuBuilder() {
     icon: '',
     route: '',
     content_type: 'static',
+    visibility: 'admin',
     order_index: 0
   });
 
@@ -68,7 +69,7 @@ function MenuBuilder() {
         setMessage('Menu item created successfully');
       }
 
-      setFormData({ title: '', icon: '', route: '', content_type: 'static', order_index: 0 });
+      setFormData({ title: '', icon: '', route: '', content_type: 'static', visibility: 'admin', order_index: 0 });
       setEditingItem(null);
       setShowModal(false);
       fetchMenuItems();
@@ -87,6 +88,7 @@ function MenuBuilder() {
       icon: item.icon,
       route: item.route,
       content_type: item.content_type,
+      visibility: item.visibility || 'admin',
       order_index: item.order_index
     });
     setShowModal(true);
@@ -184,7 +186,7 @@ function MenuBuilder() {
                   <div className="menu-item-details">
                     <h3>{item.title}</h3>
                     <p>Route: /app/{item.route}</p>
-                    <small>Type: {item.content_type}</small>
+                    <small>Type: {item.content_type} | Visibility: {item.visibility || 'admin'}</small>
                   </div>
                 </div>
                 <div className="menu-item-actions">
@@ -278,6 +280,16 @@ function MenuBuilder() {
                 >
                   <option value="static">Static</option>
                   <option value="dynamic">Dynamic</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Visibility</label>
+                <select
+                  value={formData.visibility}
+                  onChange={(e) => setFormData({ ...formData, visibility: e.target.value })}
+                >
+                  <option value="admin">Admin Only</option>
+                  <option value="public">Public</option>
                 </select>
               </div>
               <div className="modal-actions">

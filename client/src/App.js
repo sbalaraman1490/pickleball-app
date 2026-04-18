@@ -18,6 +18,7 @@ import AdminGallery from './pages/AdminGallery';
 import MenuBuilder from './pages/MenuBuilder';
 import PageBuilder from './pages/PageBuilder';
 import DynamicPage from './pages/DynamicPage';
+import PublicDynamicPage from './pages/PublicDynamicPage';
 import AppLayout from './AppLayout';
 import PublicLayout from './PublicLayout';
 import './App.css';
@@ -42,6 +43,7 @@ function App() {
           <Route path="/alta" element={<PublicLayout><AltaPerformance /></PublicLayout>} />
           <Route path="/chat" element={<PublicLayout><Chat /></PublicLayout>} />
           <Route path="/gallery" element={<PublicLayout><Gallery /></PublicLayout>} />
+          <Route path="/:route" element={<PublicLayout><PublicDynamicPage /></PublicLayout>} />
           
           {/* Protected App Routes */}
           <Route path="/app/*" element={

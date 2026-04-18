@@ -1,13 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { BookOpen, MessageSquare, ShoppingBag, LogIn, UserPlus, Home, Trophy, Bot, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
+import { apiFetch } from './utils/api';
 import './PublicLayout.css';
 
 function PublicLayout({ children }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
+
+  const [publicMenuItems, setPublicMenuItems] = useState([]);
+
+  useEffect(() => {
+    const fetchPublicMenuItems = async () => {
+      try {
+        const data = await apiFetch('/api/public/menu-items');
+        setPublicMenuItems(data.items || []);
+      } catch (error) {
+        console.error('Error fetching public menu items:', error);
+      }
+    };
+    fetchPublicMenuItems();
+  }, []);
 
   const publicLinks = [
     { path: '/rules', label: 'Rules & Guide', icon: BookOpen },
@@ -39,6 +54,16 @@ function PublicLayout({ children }) {
               >
                 <link.icon size={18} />
                 {link.label}
+              </Link>
+            ))}
+            {publicMenuItems.map(item => (
+              <Link
+                key={item.id}
+                to={`/${item.route}`}
+                className={`public-nav-link ${isActive(`/${item.route}`) ? 'active' : ''}`}
+              >
+                <span>📄</span>
+                {item.title}
               </Link>
             ))}
           </nav>
