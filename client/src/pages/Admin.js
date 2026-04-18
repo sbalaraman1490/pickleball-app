@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Receipt, Check, X, Shield, User, Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Users, Receipt, Check, X, Shield, User, Plus, Image as ImageIcon } from 'lucide-react';
 import { apiFetch } from '../utils/api';
 import './Admin.css';
 
 function Admin() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('users');
   const [users, setUsers] = useState([]);
   const [pendingExpenses, setPendingExpenses] = useState([]);
@@ -133,8 +135,16 @@ function Admin() {
   return (
     <div>
       <div className="page-header">
-        <h1>Admin Dashboard</h1>
-        <p>Manage users and approve expenses</p>
+        <div>
+          <h1>Admin Dashboard</h1>
+          <p>Manage users and approve expenses</p>
+        </div>
+        <button
+          className="btn btn-secondary"
+          onClick={() => navigate('/admin-gallery')}
+        >
+          <ImageIcon size={18} /> Manage Gallery
+        </button>
       </div>
 
       {message && <div className="admin-message">{message}</div>}

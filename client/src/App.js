@@ -13,6 +13,8 @@ import PaddleCompare from './pages/PaddleCompare';
 import DuprLookup from './pages/DuprLookup';
 import AltaPerformance from './pages/AltaPerformance';
 import Chat from './pages/Chat';
+import Gallery from './pages/Gallery';
+import AdminGallery from './pages/AdminGallery';
 import AppLayout from './AppLayout';
 import PublicLayout from './PublicLayout';
 import './App.css';
@@ -36,11 +38,19 @@ function App() {
           <Route path="/dupr" element={<PublicLayout><DuprLookup /></PublicLayout>} />
           <Route path="/alta" element={<PublicLayout><AltaPerformance /></PublicLayout>} />
           <Route path="/chat" element={<PublicLayout><Chat /></PublicLayout>} />
+          <Route path="/gallery" element={<PublicLayout><Gallery /></PublicLayout>} />
           
           {/* Protected App Routes */}
           <Route path="/app/*" element={
             <ProtectedRoute>
               <AppLayout />
+            </ProtectedRoute>
+          } />
+          
+          {/* Admin Gallery Route */}
+          <Route path="/admin-gallery" element={
+            <ProtectedRoute>
+              <AdminGallery />
             </ProtectedRoute>
           } />
         

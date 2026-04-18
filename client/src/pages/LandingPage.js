@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { BookOpen, MessageSquare, ShoppingBag, ArrowRight, Play, Trophy, Bot } from 'lucide-react';
+import { BookOpen, MessageSquare, ShoppingBag, ArrowRight, Play, Trophy, Bot, Image as ImageIcon } from 'lucide-react';
 import './LandingPage.css';
 
 function LandingPage() {
@@ -44,6 +44,10 @@ function LandingPage() {
           <Link to="/chat" className="nav-link">
             <Bot size={18} />
             <span>AI Chat</span>
+          </Link>
+          <Link to="/gallery" className="nav-link">
+            <ImageIcon size={18} />
+            <span>Gallery</span>
           </Link>
           <Link to="/login" className="nav-link login-link">
             <span>Login</span>

@@ -460,6 +460,17 @@ db.serialize(() => {
     upload_id TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+
+  // Gallery images table
+  db.run(`CREATE TABLE IF NOT EXISTS gallery_images (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT,
+    image_url TEXT NOT NULL,
+    uploaded_by TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (uploaded_by) REFERENCES users(id)
+  )`);
 });
 
 // ========== AUTHENTICATION MIDDLEWARE & API ==========
@@ -2663,6 +2674,98 @@ app.get('/api/debug/env', (req, res) => {
     groq_key_length: GROQ_API_KEY?.length || 0,
     groq_model: GROQ_MODEL,
     node_env: process.env.NODE_ENV
+  });
+});
+
+// ========== GALLERY APIs ==========
+
+// Upload gallery image (admin only)
+app.post('/api/gallery/upload', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  
+  // Check if user is admin
+  db.get('SELECT role FROM users WHERE id = ?', [userId], (err, user) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+    
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    const { title, description, image_url } = req.body;
+
+    if (!title || !image_url) {
+      return res.status(400).json({ error: 'Title and image URL are required' });
+    }
+
+    const imageId = uuidv4();
+
+    db.run(
+      'INSERT INTO gallery_images (id, title, description, image_url, uploaded_by) VALUES (?, ?, ?, ?, ?)',
+      [imageId, title, description, image_url, userId],
+      function(err) {
+        if (err) {
+          return res.status(500).json({ error: 'Failed to save image' });
+        }
+
+        res.json({
+          success: true,
+          message: 'Image uploaded successfully',
+          image: {
+            id: imageId,
+            title,
+            description,
+            image_url,
+            uploaded_by: userId
+          }
+        });
+      }
+    );
+  });
+});
+
+// Get all gallery images (public)
+app.get('/api/gallery', (req, res) => {
+  db.all(
+    'SELECT id, title, description, image_url, created_at FROM gallery_images ORDER BY created_at DESC',
+    [],
+    (err, images) => {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to fetch gallery' });
+      }
+
+      res.json({ images });
+    }
+  );
+});
+
+// Delete gallery image (admin only)
+app.delete('/api/gallery/:id', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  const imageId = req.params.id;
+
+  // Check if user is admin
+  db.get('SELECT role FROM users WHERE id = ?', [userId], (err, user) => {
+    if (err) {
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+
+    db.run('DELETE FROM gallery_images WHERE id = ?', [imageId], function(err) {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to delete image' });
+      }
+
+      if (this.changes === 0) {
+        return res.status(404).json({ error: 'Image not found' });
+      }
+
+      res.json({ success: true, message: 'Image deleted successfully' });
+    });
   });
 });
 

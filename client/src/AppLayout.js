@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, NavLink, Link } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Users, Receipt, Scale, LogOut, Shield, User, BookOpen, MessageSquare, ShoppingBag } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Receipt, Scale, LogOut, Shield, User, BookOpen, MessageSquare, ShoppingBag, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import Dashboard from './pages/Dashboard';
 import Games from './pages/Games';
@@ -12,6 +12,7 @@ import Profile from './pages/Profile';
 import Rules from './pages/Rules';
 import Feed from './pages/Feed';
 import PaddleCompare from './pages/PaddleCompare';
+import Gallery from './pages/Gallery';
 import './App.css';
 
 function AppLayout() {
@@ -100,6 +101,12 @@ function AppLayout() {
               <span>Paddle Compare</span>
             </NavLink>
           </li>
+          <li>
+            <NavLink to="/app/gallery" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              <ImageIcon size={20} />
+              <span>Gallery</span>
+            </NavLink>
+          </li>
           <li className="nav-divider"></li>
           <li>
             <NavLink to="/app/profile" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
@@ -132,6 +139,7 @@ function AppLayout() {
           <Route path="/rules" element={<Rules />} />
           <Route path="/feed" element={<Feed />} />
           <Route path="/paddles" element={<PaddleCompare />} />
+          <Route path="/gallery" element={<Gallery />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/admin" element={<Admin />} />
         </Routes>
