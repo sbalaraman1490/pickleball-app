@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, NavLink, Link } from 'react-router-dom';
-import { LayoutDashboard, Calendar, Users, Receipt, Scale, LogOut, Shield, User, BookOpen, MessageSquare, ShoppingBag, Image as ImageIcon, Layout } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, Receipt, Scale, LogOut, Shield, User, BookOpen, MessageSquare, ShoppingBag, Image as ImageIcon, Layout, Settings } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import { apiFetch } from './utils/api';
 import Dashboard from './pages/Dashboard';
