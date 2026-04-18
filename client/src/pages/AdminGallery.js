@@ -14,7 +14,8 @@ function AdminGallery() {
   const [newImage, setNewImage] = useState({
     title: '',
     description: '',
-    image_url: ''
+    image_url: '',
+    image_file: null
   });
 
   useEffect(() => {
@@ -38,15 +39,38 @@ function AdminGallery() {
     setUploading(true);
     setMessage('');
 
+    // Validation: require either file or URL
+    if (!newImage.image_file && !newImage.image_url) {
+      setMessage('Please upload an image file or provide an image URL');
+      setUploading(false);
+      return;
+    }
+
     try {
-      await apiFetch('/api/gallery/upload', {
+      let imageUrl = newImage.image_url;
+
+      // If a file is selected, convert it to base64
+      if (newImage.image_file) {
+        const reader = new FileReader();
+        imageUrl = await new Promise((resolve, reject) => {
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(newImage.image_file);
+        });
+      }
+
+      await apiFetch('/api/admin/gallery/upload', {
         method: 'POST',
-        body: JSON.stringify(newImage)
+        body: JSON.stringify({
+          title: newImage.title,
+          description: newImage.description,
+          image_url: imageUrl
+        })
       });
 
       setMessage('Image uploaded successfully');
-      setNewImage({ title: '', description: '', image_url: '' });
       setShowUploadModal(false);
+      setNewImage({ title: '', description: '', image_url: '', image_file: null });
       fetchGallery();
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -166,15 +190,25 @@ function AdminGallery() {
                 />
               </div>
               <div className="form-group">
-                <label>Image URL *</label>
+                <label>Upload Image File</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setNewImage({ ...newImage, image_file: e.target.files[0], image_url: '' })}
+                  className="file-input"
+                />
+                <small className="form-hint">Or enter image URL below</small>
+              </div>
+              <div className="form-group">
+                <label>Image URL</label>
                 <input
                   type="url"
                   value={newImage.image_url}
-                  onChange={(e) => setNewImage({ ...newImage, image_url: e.target.value })}
+                  onChange={(e) => setNewImage({ ...newImage, image_url: e.target.value, image_file: null })}
                   placeholder="https://example.com/image.jpg"
-                  required
+                  disabled={!!newImage.image_file}
                 />
-                <small>Enter the URL of the image you want to add to the gallery</small>
+                <small>Enter the URL of the image (if not uploading a file)</small>
               </div>
               <div className="modal-actions">
                 <button type="button" onClick={() => setShowUploadModal(false)}>
