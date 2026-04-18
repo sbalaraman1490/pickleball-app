@@ -16,6 +16,7 @@ function PublicLayout({ children }) {
     const fetchPublicMenuItems = async () => {
       try {
         const data = await apiFetch('/api/public/menu-items');
+        console.log('Public menu items fetched:', data);
         setPublicMenuItems(data.items || []);
       } catch (error) {
         console.error('Error fetching public menu items:', error);
