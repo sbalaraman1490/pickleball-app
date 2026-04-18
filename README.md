@@ -167,6 +167,33 @@ pickleball-app/
 └── README.md
 ```
 
+## Railway Deployment with Persistent Storage
+
+To prevent data loss when redeploying on Railway, you need to set up a persistent volume:
+
+### Step 1: Create a Volume in Railway
+1. Go to your Railway project dashboard
+2. Click on your service
+3. Go to the "Volumes" tab
+4. Click "Add Volume"
+5. Set the mount path to `/data`
+6. Choose an appropriate size (e.g., 1GB)
+
+### Step 2: Set Environment Variable
+Add this environment variable in Railway:
+- `DATABASE_PATH` = `/data/pickleball.db`
+
+### Step 3: Deploy
+The app will now store the database in the persistent volume at `/data/pickleball.db`, which survives redeploys.
+
+### Migrating Existing Data
+If you have existing data in a local database that you want to migrate:
+
+1. Download your current database from Railway (if any)
+2. Or use the local `server/pickleball.db` file
+3. Upload it to the Railway volume using the Railway CLI or dashboard
+4. Set the `DATABASE_PATH` to point to the uploaded file location
+
 ## Backup
 
 The SQLite database file at `server/pickleball.db` contains all your data. Back it up regularly:
@@ -174,6 +201,10 @@ The SQLite database file at `server/pickleball.db` contains all your data. Back 
 ```bash
 cp server/pickleball.db backup/dinkans-$(date +%Y%m%d).db
 ```
+
+For Railway deployments with persistent volumes, you can also backup by:
+1. Accessing the volume through Railway CLI
+2. Copying the database file from `/data/pickleball.db`
 
 ## License
 

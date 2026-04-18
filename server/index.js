@@ -355,8 +355,12 @@ const upload = multer({
 // Serve static files from React build
 app.use(express.static(path.join(__dirname, '../client/build')));
 
-// Initialize SQLite database
-const db = new sqlite3.Database(path.join(__dirname, 'pickleball.db'));
+// Initialize SQLite database with persistent storage support
+// Use DATABASE_PATH env var for Railway volume, fallback to local file
+const DB_PATH = process.env.DATABASE_PATH || path.join(__dirname, 'pickleball.db');
+console.log('Database path:', DB_PATH);
+
+const db = new sqlite3.Database(DB_PATH);
 
 db.serialize(() => {
   // Players table
