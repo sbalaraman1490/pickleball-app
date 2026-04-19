@@ -59,7 +59,7 @@ function AdminGallery() {
         });
       }
 
-      await apiFetch('/api/admin/gallery/upload', {
+      await apiFetch('/api/gallery/upload', {
         method: 'POST',
         body: JSON.stringify({
           title: newImage.title,
