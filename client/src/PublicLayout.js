@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { BookOpen, MessageSquare, ShoppingBag, LogIn, UserPlus, Home, Trophy, Bot, Image as ImageIcon, LayoutDashboard, Settings, FileText, Calendar, Users, BarChart3, Database, Globe, Mail, Folder, Star, Heart } from 'lucide-react';
+import { BookOpen, MessageSquare, ShoppingBag, LogIn, UserPlus, Home, Trophy, Bot, Image as ImageIcon, LayoutDashboard, Settings, FileText, Calendar, Users, BarChart3, Database, Globe, Mail, Folder, Star, Heart, Menu, X } from 'lucide-react';
 import { useAuth } from './context/AuthContext';
 import { apiFetch } from './utils/api';
 import './PublicLayout.css';
@@ -33,6 +33,7 @@ function PublicLayout({ children }) {
   const { user } = useAuth();
 
   const [publicMenuItems, setPublicMenuItems] = useState([]);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchPublicMenuItems = async () => {
@@ -58,6 +59,9 @@ function PublicLayout({ children }) {
 
   const isActive = (path) => location.pathname === path;
 
+  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+
   return (
     <div className="public-layout">
       {/* Public Header */}
@@ -68,12 +72,17 @@ function PublicLayout({ children }) {
             <span className="logo-text">Dinkans</span>
           </Link>
           
-          <nav className="public-nav">
+          <button className="mobile-menu-toggle" onClick={toggleMobileMenu} aria-label="Toggle menu">
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+
+          <nav className={`public-nav ${mobileMenuOpen ? 'mobile-open' : ''}`}>
             {publicLinks.map(link => (
               <Link
                 key={link.path}
                 to={link.path}
                 className={`public-nav-link ${isActive(link.path) ? 'active' : ''}`}
+                onClick={closeMobileMenu}
               >
                 <link.icon size={18} />
                 {link.label}
@@ -86,6 +95,7 @@ function PublicLayout({ children }) {
                   key={item.id}
                   to={`/${item.route}`}
                   className={`public-nav-link ${isActive(`/${item.route}`) ? 'active' : ''}`}
+                  onClick={closeMobileMenu}
                 >
                   <MenuIcon size={18} />
                   {item.title}
@@ -93,6 +103,7 @@ function PublicLayout({ children }) {
               );
             })}
           </nav>
+          {mobileMenuOpen && <div className="mobile-overlay" onClick={closeMobileMenu}></div>}
 
           <div className="public-auth">
             {user ? (

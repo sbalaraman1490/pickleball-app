@@ -529,6 +529,38 @@ db.serialize(() => {
     FOREIGN KEY (menu_item_id) REFERENCES custom_menu_items(id) ON DELETE CASCADE,
     FOREIGN KEY (created_by) REFERENCES users(id)
   )`);
+
+  // Create default admin user if no users exist
+  db.get('SELECT COUNT(*) as count FROM users', [], async (err, row) => {
+    if (err) {
+      console.error('Error checking users:', err);
+      return;
+    }
+    
+    if (row.count === 0) {
+      try {
+        const adminId = uuidv4();
+        const adminEmail = 'admin@dinkans.com';
+        const adminPassword = await bcrypt.hash('admin', 10);
+        
+        db.run(
+          'INSERT INTO users (id, name, email, password, role, approved) VALUES (?, ?, ?, ?, ?, ?)',
+          [adminId, 'Admin', adminEmail, adminPassword, 'admin', 1],
+          (err) => {
+            if (err) {
+              console.error('Error creating default admin:', err);
+            } else {
+              console.log('Default admin user created:');
+              console.log('  Email: admin@dinkans.com');
+              console.log('  Password: admin');
+            }
+          }
+        );
+      } catch (error) {
+        console.error('Error hashing admin password:', error);
+      }
+    }
+  });
 });
 
 // ========== AUTHENTICATION MIDDLEWARE & API ==========
