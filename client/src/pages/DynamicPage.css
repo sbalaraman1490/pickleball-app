@@ -101,6 +101,28 @@
   opacity: 0.95;
 }
 
+.template-hero .edit-content-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding: 12px 24px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #2563eb;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.template-hero .edit-content-btn:hover {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
 .template-hero .sections-container {
   display: flex;
   flex-direction: column;
