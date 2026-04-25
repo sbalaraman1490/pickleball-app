@@ -73,6 +73,13 @@ function App() {
               <PageBuilder />
             </ProtectedRoute>
           } />
+
+          {/* Players Bulk Upload Route (Admin Only) */}
+          <Route path="/app/players-bulk-upload" element={
+            <ProtectedRoute>
+              <PlayersBulkUpload />
+            </ProtectedRoute>
+          } />
         
         {/* Redirect old routes to /app */}
         <Route path="/dashboard" element={<Navigate to="/app" replace />} />
