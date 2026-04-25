@@ -1,0 +1,387 @@
+.players-bulk-upload {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.upload-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.upload-header h1 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e3a5f;
+  margin: 0;
+}
+
+.back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #f1f5f9;
+  border: none;
+  border-radius: 8px;
+  color: #475569;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.back-button:hover {
+  background: #e2e8f0;
+  color: #1e3a5f;
+}
+
+.template-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.template-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.upload-section {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.upload-info {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.upload-info h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e3a5f;
+  margin-bottom: 16px;
+}
+
+.upload-info p {
+  color: #64748b;
+  margin-bottom: 16px;
+}
+
+.upload-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 12px;
+}
+
+.upload-info li {
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+}
+
+.upload-info li strong {
+  color: #1e3a5f;
+}
+
+.upload-area {
+  border: 2px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 48px;
+  text-align: center;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.upload-area:hover,
+.upload-area.drag-active {
+  border-color: #3b82f6;
+  background: #f8fafc;
+}
+
+.file-input {
+  display: none;
+}
+
+.upload-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+}
+
+.upload-label svg {
+  color: #94a3b8;
+}
+
+.upload-text {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #334155;
+}
+
+.upload-subtext {
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+.file-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.upload-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.upload-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.upload-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.cancel-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #f1f5f9;
+  color: #64748b;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cancel-button:hover {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.results-section {
+  margin-top: 32px;
+  padding: 24px;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.results-section.success {
+  border: 1px solid #10b981;
+  background: #f0fdf4;
+}
+
+.results-section.error {
+  border: 1px solid #ef4444;
+  background: #fef2f2;
+}
+
+.results-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.results-section.success h3 {
+  color: #059669;
+}
+
+.results-section.error h3 {
+  color: #dc2626;
+}
+
+.results-summary {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 24px;
+  border-radius: 12px;
+  min-width: 120px;
+}
+
+.summary-item.success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.summary-item.total {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.summary-item.error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.summary-item .count {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.summary-item .label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.error-message {
+  padding: 16px;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.players-list {
+  margin-top: 24px;
+}
+
+.players-list h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e3a5f;
+  margin-bottom: 16px;
+}
+
+.players-list table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.players-list th,
+.players-list td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.players-list th {
+  font-weight: 600;
+  color: #64748b;
+  background: #f8fafc;
+}
+
+.players-list td {
+  color: #334155;
+}
+
+.errors-section {
+  margin-top: 24px;
+}
+
+.errors-section h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #dc2626;
+  margin-bottom: 16px;
+}
+
+.error-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.error-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .players-bulk-upload {
+    padding: 16px;
+  }
+
+  .upload-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .upload-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .upload-section {
+    padding: 20px;
+  }
+
+  .upload-area {
+    padding: 32px 20px;
+  }
+
+  .upload-info ul {
+    grid-template-columns: 1fr;
+  }
+
+  .results-summary {
+    justify-content: center;
+  }
+
+  .players-list {
+    overflow-x: auto;
+  }
+
+  .players-list table {
+    min-width: 500px;
+  }
+}

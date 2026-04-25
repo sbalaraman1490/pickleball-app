@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit2, Trash2, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Upload } from 'lucide-react';
 import { apiFetch } from '../utils/api';
+import { Link } from 'react-router-dom';
 
 function Players() {
   const [players, setPlayers] = useState([]);
@@ -11,7 +12,11 @@ function Players() {
     name: '',
     email: '',
     phone: '',
-    skill_level: 'Beginner'
+    skill_level: 'Beginner',
+    alta_id: '',
+    gender: '',
+    team: '',
+    role: ''
   });
 
   useEffect(() => {
@@ -69,8 +74,13 @@ function Players() {
 
   const openAddModal = () => {
     setEditingPlayer(null);
-    setFormData({ name: '', email: '', phone: '', skill_level: 'Beginner' });
+    setFormData({ name: '', email: '', phone: '', skill_level: 'Beginner', alta_id: '', gender: '', team: '', role: '', address: '', city: '', state: '', zip: '', country: '' });
     setShowModal(true);
+  };
+
+  const resetForm = () => {
+    setEditingPlayer(null);
+    setFormData({ name: '', email: '', phone: '', skill_level: 'Beginner', alta_id: '', gender: '', team: '', role: '', address: '', city: '', state: '', zip: '', country: '' });
   };
 
   const getSkillBadge = (level) => {
@@ -94,9 +104,14 @@ function Players() {
       <div className="card">
         <div className="card-header">
           <h3 className="card-title">All Players</h3>
-          <button className="btn btn-primary" onClick={openAddModal}>
-            <Plus size={18} /> Add Player
-          </button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <Link to="/app/players-bulk-upload" className="btn btn-secondary">
+              <Upload size={18} /> Bulk Import
+            </Link>
+            <button className="btn btn-primary" onClick={openAddModal}>
+              <Plus size={18} /> Add Player
+            </button>
+          </div>
         </div>
 
         {players.length > 0 ? (
@@ -105,6 +120,10 @@ function Players() {
               <thead>
                 <tr>
                   <th>Name</th>
+                  <th>ALTA ID</th>
+                  <th>Gender</th>
+                  <th>Team</th>
+                  <th>Role</th>
                   <th>Email</th>
                   <th>Phone</th>
                   <th>Skill Level</th>
@@ -115,6 +134,10 @@ function Players() {
                 {players.map(player => (
                   <tr key={player.id}>
                     <td><strong>{player.name}</strong></td>
+                    <td>{player.alta_id || '-'}</td>
+                    <td>{player.gender || '-'}</td>
+                    <td>{player.team || '-'}</td>
+                    <td>{player.role || '-'}</td>
                     <td>{player.email || '-'}</td>
                     <td>{player.phone || '-'}</td>
                     <td>
@@ -167,6 +190,30 @@ function Players() {
                 </div>
                 <div className="form-row">
                   <div className="form-group">
+                    <label className="form-label">ALTA ID</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={formData.alta_id}
+                      onChange={e => setFormData({...formData, alta_id: e.target.value})}
+                      placeholder="ALTA registration number"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Gender</label>
+                    <select
+                      className="form-select"
+                      value={formData.gender}
+                      onChange={e => setFormData({...formData, gender: e.target.value})}
+                    >
+                      <option value="">-- Select --</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
                     <label className="form-label">Email</label>
                     <input
                       type="email"
@@ -182,6 +229,28 @@ function Players() {
                       className="form-input"
                       value={formData.phone}
                       onChange={e => setFormData({...formData, phone: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Team</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={formData.team}
+                      onChange={e => setFormData({...formData, team: e.target.value})}
+                      placeholder="Team name"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Role</label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={formData.role}
+                      onChange={e => setFormData({...formData, role: e.target.value})}
+                      placeholder="Player's role/position"
                     />
                   </div>
                 </div>

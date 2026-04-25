@@ -395,6 +395,10 @@ db.serialize(() => {
     email TEXT,
     phone TEXT,
     skill_level TEXT,
+    alta_id TEXT,
+    gender TEXT,
+    team TEXT,
+    role TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
 
@@ -1181,29 +1185,29 @@ app.get('/api/players', authenticateToken, (req, res) => {
 
 // Create player (protected)
 app.post('/api/players', authenticateToken, (req, res) => {
-  const { name, email, phone, skill_level } = req.body;
+  const { name, email, phone, skill_level, alta_id, gender, team, role } = req.body;
   const id = uuidv4();
   
   db.run(
-    'INSERT INTO players (id, name, email, phone, skill_level) VALUES (?, ?, ?, ?, ?)',
-    [id, name, email, phone, skill_level],
+    'INSERT INTO players (id, name, email, phone, skill_level, alta_id, gender, team, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [id, name, email, phone, skill_level, alta_id, gender, team, role],
     function(err) {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ id, name, email, phone, skill_level });
+      res.json({ id, name, email, phone, skill_level, alta_id, gender, team, role });
     }
   );
 });
 
 // Update player (protected)
 app.put('/api/players/:id', authenticateToken, (req, res) => {
-  const { name, email, phone, skill_level } = req.body;
+  const { name, email, phone, skill_level, alta_id, gender, team, role } = req.body;
   
   db.run(
-    'UPDATE players SET name = ?, email = ?, phone = ?, skill_level = ? WHERE id = ?',
-    [name, email, phone, skill_level, req.params.id],
+    'UPDATE players SET name = ?, email = ?, phone = ?, skill_level = ?, alta_id = ?, gender = ?, team = ?, role = ? WHERE id = ?',
+    [name, email, phone, skill_level, alta_id, gender, team, role, req.params.id],
     function(err) {
       if (err) return res.status(500).json({ error: err.message });
-      res.json({ id: req.params.id, name, email, phone, skill_level });
+      res.json({ id: req.params.id, name, email, phone, skill_level, alta_id, gender, team, role });
     }
   );
 });
@@ -1214,6 +1218,79 @@ app.delete('/api/players/:id', authenticateToken, (req, res) => {
     if (err) return res.status(500).json({ error: err.message });
     res.json({ message: 'Player deleted' });
   });
+});
+
+// Bulk import players from Excel (admin only)
+app.post('/api/admin/players/bulk-import', authenticateToken, requireAdmin, upload.single('excelFile'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(worksheet);
+
+    const results = [];
+    const errors = [];
+    const addedPlayers = [];
+
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      
+      // Try different possible column names
+      const name = row['Name'] || row['name'] || row['Full Name'] || row['fullName'];
+      const gender = row['Gender'] || row['gender'] || row['Sex'] || row['sex'];
+      const team = row['Team'] || row['team'];
+      const role = row['Role'] || row['role'] || row['Position'] || row['position'];
+      const altaId = row['Alta registration id'] || row['ALTA ID'] || row['alta_id'] || row['ALTA'] || row['alta'];
+      const email = row['Email'] || row['email'] || row['E-mail'] || '';
+      const phone = row['Phone'] || row['phone'] || '';
+      const skillLevel = row['Skill Level'] || row['skill_level'] || row['Skill'] || 'Beginner';
+
+      if (!name) {
+        errors.push({
+          row: i + 2,
+          error: 'Missing player name',
+          data: row
+        });
+        continue;
+      }
+
+      const playerId = uuidv4();
+      
+      try {
+        db.run(
+          'INSERT INTO players (id, name, email, phone, skill_level, alta_id, gender, team, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          [playerId, name, email, phone, skillLevel, altaId, gender, team, role],
+          function(err) {
+            if (err) {
+              errors.push({ row: i + 2, error: err.message, name });
+            } else {
+              addedPlayers.push({ id: playerId, name, email, alta_id: altaId, gender, team, role });
+            }
+          }
+        );
+        results.push({ name, status: 'success' });
+      } catch (insertErr) {
+        errors.push({ row: i + 2, error: insertErr.message, name });
+      }
+    }
+
+    res.json({
+      success: true,
+      totalProcessed: data.length,
+      successful: addedPlayers.length,
+      failed: errors.length,
+      players: addedPlayers,
+      errors
+    });
+
+  } catch (error) {
+    console.error('Error processing bulk player upload:', error);
+    res.status(500).json({ error: 'Failed to process Excel file: ' + error.message });
+  }
 });
 
 // ========== GAMES API ==========

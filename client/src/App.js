@@ -16,6 +16,7 @@ import Chat from './pages/Chat';
 import Gallery from './pages/Gallery';
 import AdminGallery from './pages/AdminGallery';
 import MenuBuilder from './pages/MenuBuilder';
+import PlayersBulkUpload from './pages/PlayersBulkUpload';
 import PageBuilder from './pages/PageBuilder';
 import DynamicPage from './pages/DynamicPage';
 import PublicDynamicPage from './pages/PublicDynamicPage';
