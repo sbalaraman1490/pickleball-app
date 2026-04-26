@@ -4,9 +4,13 @@ export async function apiFetch(endpoint, options = {}) {
   const token = localStorage.getItem('dinkans_token');
   
   const headers = {
-    'Content-Type': 'application/json',
     ...options.headers
   };
+  
+  // Only set Content-Type to JSON if not sending FormData
+  if (!(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
   
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
