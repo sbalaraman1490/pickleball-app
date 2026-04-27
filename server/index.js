@@ -368,13 +368,18 @@ const upload = multer({
       'text/csv' // Also allow CSV files
     ];
     
-    console.log('File upload attempt:', file.originalname, 'MIME:', file.mimetype);
+    // Also check file extension as fallback
+    const allowedExtensions = ['.xlsx', '.xls', '.csv'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    const hasValidExtension = allowedExtensions.includes(ext);
     
-    if (allowedMimes.includes(file.mimetype)) {
+    console.log('File upload attempt:', file.originalname, 'MIME:', file.mimetype, 'Extension:', ext);
+    
+    if (allowedMimes.includes(file.mimetype) || hasValidExtension) {
       cb(null, true);
     } else {
-      console.error('Rejected file. MIME type:', file.mimetype, 'Expected one of:', allowedMimes);
-      cb(new Error(`Only Excel files (.xlsx, .xls, .csv) are allowed. Got MIME type: ${file.mimetype}`), false);
+      console.error('Rejected file. MIME type:', file.mimetype, 'Extension:', ext);
+      cb(new Error(`Only Excel files (.xlsx, .xls, .csv) are allowed. Got: ${file.originalname} (${file.mimetype})`), false);
     }
   }
 });
