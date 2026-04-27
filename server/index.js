@@ -1253,6 +1253,8 @@ app.post('/api/admin/players/bulk-import', authenticateToken, requireAdmin, uplo
     const worksheet = workbook.Sheets[sheetName];
     const data = xlsx.utils.sheet_to_json(worksheet);
 
+    console.log('Parsed data:', JSON.stringify(data.slice(0, 3), null, 2)); // Debug: show first 3 rows
+
     const results = [];
     const errors = [];
     const addedPlayers = [];
@@ -1260,15 +1262,29 @@ app.post('/api/admin/players/bulk-import', authenticateToken, requireAdmin, uplo
     for (let i = 0; i < data.length; i++) {
       const row = data[i];
       
-      // Try different possible column names
-      const name = row['Name'] || row['name'] || row['Full Name'] || row['fullName'];
-      const gender = row['Gender'] || row['gender'] || row['Sex'] || row['sex'];
-      const team = row['Team'] || row['team'];
-      const role = row['Role'] || row['role'] || row['Position'] || row['position'];
-      const altaId = row['Alta registration id'] || row['ALTA ID'] || row['alta_id'] || row['ALTA'] || row['alta'];
-      const email = row['Email'] || row['email'] || row['E-mail'] || '';
-      const phone = row['Phone'] || row['phone'] || '';
-      const skillLevel = row['Skill Level'] || row['skill_level'] || row['Skill'] || 'Beginner';
+      // Debug: log all keys in the row
+      console.log('Row keys:', Object.keys(row));
+      
+      // Try different possible column names (trim whitespace)
+      const getValue = (keys) => {
+        for (const key of keys) {
+          // Try exact match
+          if (row[key] !== undefined && row[key] !== '') return row[key];
+          // Try case-insensitive match
+          const matchKey = Object.keys(row).find(k => k.trim().toLowerCase() === key.toLowerCase());
+          if (matchKey && row[matchKey] !== undefined && row[matchKey] !== '') return row[matchKey];
+        }
+        return '';
+      };
+      
+      const name = getValue(['Name', 'name', 'Full Name', 'fullName', 'Player Name', 'player_name', 'Player']);
+      const gender = getValue(['Gender', 'gender', 'Sex', 'sex']);
+      const team = getValue(['Team', 'team']);
+      const role = getValue(['Role', 'role', 'Position', 'position']);
+      const altaId = getValue(['Alta registration id', 'ALTA ID', 'alta_id', 'ALTA', 'alta', 'AltaId']);
+      const email = getValue(['Email', 'email', 'E-mail', 'E-Mail']);
+      const phone = getValue(['Phone', 'phone', 'Mobile', 'mobile']);
+      const skillLevel = getValue(['Skill Level', 'skill_level', 'Skill', 'skill']) || 'Beginner';
 
       if (!name) {
         errors.push({
