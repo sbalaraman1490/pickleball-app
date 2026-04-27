@@ -1326,7 +1326,7 @@ app.post('/api/admin/players/bulk-import', authenticateToken, requireAdmin, uplo
 
   } catch (error) {
     console.error('Error processing bulk player upload:', error);
-    res.status(500).json({ error: 'Failed to process Excel file: ' + error.message });
+    return res.status(500).json({ error: 'Failed to process Excel file: ' + error.message });
   }
 });
 
