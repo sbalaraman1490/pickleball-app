@@ -354,11 +354,27 @@ const upload = multer({
     fileSize: 10 * 1024 * 1024 // 10MB limit
   },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || 
-        file.mimetype === 'application/vnd.ms-excel') {
+    const allowedMimes = [
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
+      'application/vnd.ms-excel', // .xls
+      'application/msexcel',
+      'application/x-msexcel',
+      'application/x-ms-excel',
+      'application/x-excel',
+      'application/x-dos_ms_excel',
+      'application/xls',
+      'application/x-xls',
+      'application/octet-stream', // Sometimes files are detected as this
+      'text/csv' // Also allow CSV files
+    ];
+    
+    console.log('File upload attempt:', file.originalname, 'MIME:', file.mimetype);
+    
+    if (allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Only Excel files are allowed'), false);
+      console.error('Rejected file. MIME type:', file.mimetype, 'Expected one of:', allowedMimes);
+      cb(new Error(`Only Excel files (.xlsx, .xls, .csv) are allowed. Got MIME type: ${file.mimetype}`), false);
     }
   }
 });
